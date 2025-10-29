@@ -57,9 +57,9 @@ public partial class Game3DLayer : UIElement
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
 
-        (Camera as PerspectiveCamera)!.CameraMode = CameraMode.FirstPerson;
-        (Camera as PerspectiveCamera)!.TargetDistance = 25;
-        (Camera as PerspectiveCamera)!.Target(_player);
+        Camera.CameraMode = CameraMode.ThirdPerson;
+        Camera.TargetDistance = 25;
+        Camera.Target(_player);
     }
 
     protected override void OnUnloaded()
@@ -137,6 +137,9 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
             _cameraMovementDirection.Y = 1;
         else if (e.Key == Keys.Subtract)
             _cameraMovementDirection.Y = -1;
+
+        else if (e.Key == Keys.F5)
+            Camera.CameraMode = (CameraMode)(((int)Camera.CameraMode + 1) % 3);
     }
 
     void IKeyboardInputReceiver.OnKeyReleased(in KeyboardEventArgs e)
@@ -165,8 +168,12 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 
         if (deltaX == 0 && deltaY == 0) return;
 
-        _player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
-        //Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
+        if (Camera.CameraMode == CameraMode.ThirdPerson)
+            Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
+        else if (Camera.CameraMode == CameraMode.FirstPerson)
+            _player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
+        else
+            Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
 
         Mouse.SetPosition(_screenCenter.X, _screenCenter.Y);
     }

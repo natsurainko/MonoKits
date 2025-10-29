@@ -50,18 +50,25 @@ internal partial class UILayer : ContentControl
             Text = "Focused UIElement: -",
             TextWrapping = TextWrapping.NoWrap,
         };
-        TextBlock positionTextBlock = new()
+        TextBlock cameraModeTextBlock = new()
         {
             FontFamily = new DynamicFontFamily(Contents.Unifont),
             Foreground = Color.White,
-            Text = "Position: -",
+            Text = "Camera Mode: -",
             TextWrapping = TextWrapping.NoWrap,
         };
-        TextBlock directionTextBlock = new()
+        TextBlock cameraPositionTextBlock = new()
         {
             FontFamily = new DynamicFontFamily(Contents.Unifont),
             Foreground = Color.White,
-            Text = "Directionn: -",
+            Text = "Camera Position: -",
+            TextWrapping = TextWrapping.NoWrap,
+        };
+        TextBlock cameraRotationTextBlock = new()
+        {
+            FontFamily = new DynamicFontFamily(Contents.Unifont),
+            Foreground = Color.White,
+            Text = "Camera Rotation: -",
             TextWrapping = TextWrapping.NoWrap,
         };
 
@@ -96,8 +103,9 @@ internal partial class UILayer : ContentControl
                 fpsTextBlock,
                 focusedElementTextBlock,
                 _pressingKeysTextBlock,
-                positionTextBlock,
-                directionTextBlock
+                cameraModeTextBlock,
+                cameraPositionTextBlock,
+                cameraRotationTextBlock
             }
         };
 
@@ -117,16 +125,15 @@ internal partial class UILayer : ContentControl
         {
             fpsTextBlock.Text = $"FPS: {_framesCounter.FramesPerSecond:F2}";
 
-            //if (_game3DLayer.Camera != null)
-            //{
-            //    Vector3 position = _game3DLayer.Camera.Position;
-            //    float yaw = _game3DLayer.Camera.Yaw;
-            //    float pitch = _game3DLayer.Camera.Pitch;
-            //    float roll = _game3DLayer.Camera.Roll;
+            if (_game3DLayer.Camera != null)
+            {
+                Vector3 position = _game3DLayer.Camera.Position;
+                Vector3 rotation = _game3DLayer.Camera.Rotation;
 
-            //    positionTextBlock.Text = $"Position: {position.X:F2}, {position.Y:F2}, {position.Z:F2}";
-            //    directionTextBlock.Text = $"Directionn: Yaw: {yaw:F2}, Pitch: {pitch:F2}, Roll: {roll:F2}";
-            //}
+                cameraModeTextBlock.Text = $"Camera Mode: {_game3DLayer.Camera.CameraMode}";
+                cameraPositionTextBlock.Text = $"Camera Position: {position}";
+                cameraRotationTextBlock.Text = $"Camera Rotation: Yaw: {rotation.Y:F2}, Pitch: {rotation.X:F2}, Roll: {rotation.Z:F2}";
+            }
         };
     } 
 
