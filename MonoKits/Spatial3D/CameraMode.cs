@@ -4,6 +4,5 @@ public enum CameraMode
 {
     Free,
     FirstPerson,
-    ThirdPerson,
-    Orbital,
+    ThirdPerson
 }

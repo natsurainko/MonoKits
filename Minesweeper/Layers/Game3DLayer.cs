@@ -48,13 +48,18 @@ public partial class Game3DLayer : UIElement
         _player = new Player(_game.Content.Load<Model>("Models/Block"));
 
         _ground.EnableDefaultLighting();
-        //_board.EnableDefaultLighting();
+        _board.EnableDefaultLighting();
+        _player.EnableDefaultLighting();
 
         _sceneManager.AddObject(_ground);
         _sceneManager.AddObject(_board);
         _sceneManager.AddObject(_player);
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
+
+        (Camera as PerspectiveCamera)!.CameraMode = CameraMode.FirstPerson;
+        (Camera as PerspectiveCamera)!.TargetDistance = 25;
+        (Camera as PerspectiveCamera)!.Target(_player);
     }
 
     protected override void OnUnloaded()
@@ -160,9 +165,8 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 
         if (deltaX == 0 && deltaY == 0) return;
 
-        Camera.Rotate(new((float)-deltaY, (float)-deltaX, 0));
-
-        //Camera.RotateEuler((float)-deltaX, (float)-deltaY, 0.0f);
+        _player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
+        //Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
 
         Mouse.SetPosition(_screenCenter.X, _screenCenter.Y);
     }
