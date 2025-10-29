@@ -18,8 +18,6 @@ internal static class Contents
 
     public static Texture2D Title { get; set; } = null!;
 
-    public static Texture2D Test { get; set; } = null!;
-
     public static TiledMap TiledMap { get; set; } = null!;
 
     static Contents()

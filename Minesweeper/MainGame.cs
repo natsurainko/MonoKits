@@ -25,7 +25,6 @@ public class MainGame : GameApplication
     protected override void Initialize()
     {
         Contents.Title = Texture2D.FromFile(GraphicsDevice, "Content/Images/title.png");
-        Contents.Test = Texture2D.FromFile(GraphicsDevice, @"C:\Users\Natsurainko\Desktop\4872c865c4f7595ee4eed024c4ca4da8.png");
         Contents.TiledMap = Content.Load<TiledMap>("tiledmap-assets/tiled/samplemap");
 
         SDL.SetWindowMinimumSize(Window.Handle, 800, 600);

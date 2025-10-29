@@ -74,11 +74,6 @@ internal partial class DialogLayer : Control
                             Orientation = Orientation.Horizontal,
                             Children =
                             {
-                                new Image()
-                                {
-                                    VerticalAlignment = VerticalAlignment.Center,
-                                    Texture = Contents.Test,
-                                },
                                 new TextBlock()
                                 {
                                     VerticalAlignment = VerticalAlignment.Center,
