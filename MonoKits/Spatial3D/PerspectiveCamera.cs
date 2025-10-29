@@ -3,13 +3,13 @@ using MonoGame.Extended.ViewportAdapters;
 
 namespace MonoKits.Spatial3D;
 
-public class PerspectiveCamera(ViewportAdapter viewportAdapter) : ICamera
+public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, ICamera
 {
     private readonly ViewportAdapter _viewportAdapter = viewportAdapter;
     private GameObject3D? _targetObject;
 
-    private float _yaw;
-    private float _pitch;
+    //private float _yaw;
+    //private float _pitch;
 
     private Vector3 _movementAccumulator = Vector3.Zero;
     private Vector2 _rotationAccumulator = Vector2.Zero;
@@ -19,24 +19,24 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : ICamera
     public float NearPlane { get; set; } = 0.1f;
     public float FarPlane { get; set; } = 1000f;
 
-    public Vector3 Position { get; set; } = Vector3.Zero;
     public CameraMode CameraMode { get; set; } = CameraMode.Free;
 
     public void GetViewMatrix(out Matrix matrix)
     {
         if (_rotationAccumulator != Vector2.Zero)
         {
-            _pitch += _rotationAccumulator.X;
-            _yaw += _rotationAccumulator.Y;
+            float pitch = Rotation.X + _rotationAccumulator.X;
+            float yaw = Rotation.Y + _rotationAccumulator.Y;
 
-            _pitch = Math.Clamp(_pitch, -MathHelper.PiOver2, MathHelper.PiOver2);
-            _yaw = MathHelper.WrapAngle(_yaw);
+            pitch = Math.Clamp(pitch, -MathHelper.PiOver2, MathHelper.PiOver2);
+            yaw = MathHelper.WrapAngle(yaw);
 
             // Reset accumulator
-            _rotationAccumulator = Vector2.Zero; 
+            _rotationAccumulator = Vector2.Zero;
+            Rotation = new(pitch, yaw, Rotation.Z);
         }
 
-        Quaternion orientation = Quaternion.CreateFromYawPitchRoll(_yaw, _pitch, 0.0f);
+        Quaternion orientation = Quaternion.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z);
         Vector3 forward = Vector3.Transform(Vector3.Forward, orientation);
         Vector3 right = Vector3.Transform(Vector3.Right, orientation);
         Vector3 up = Vector3.Transform(Vector3.Up, orientation);

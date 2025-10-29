@@ -7,6 +7,7 @@ using MonoKits.Gui;
 using MonoKits.Gui.Input;
 using MonoKits.Overrides;
 using MonoKits.Spatial3D;
+using MonoKits.Spatial3D.Objects;
 
 namespace Minesweeper.Layers;
 
@@ -19,8 +20,8 @@ public partial class Game3DLayer : UIElement
     private readonly Game _game;
     private readonly SceneManager _sceneManager;
 
-    private GameObject3D? _ground;
-    private GameObject3D? _board;
+    private ModelObject3D? _ground;
+    private ModelObject3D? _board;
     private Player? _player;
 
     private Point _screenCenter;
@@ -42,8 +43,8 @@ public partial class Game3DLayer : UIElement
         GuiComponent.KeyboardInputManager.RegisterOnFocused(this);
         GuiComponent.MouseInputManager.Register(this);
 
-        _ground = GameObject3D.LoadContent(_game.Content, "Models/Test");
-        _board = GameObject3D.LoadContent(_game.Content, "Models/Board");
+        _ground = ModelObject3D.LoadContent(_game.Content, "Models/Test");
+        _board = ModelObject3D.LoadContent(_game.Content, "Models/Board");
         _player = new Player(_game.Content.Load<Model>("Models/Block"));
 
         _ground.EnableDefaultLighting();
@@ -88,8 +89,6 @@ public partial class Game3DLayer : UIElement
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 scaledMovement = _cameraMovementDirection * _moveSpeed * deltaTime;
             Camera.Move(scaledMovement);
-
-            //Camera.Move(scaledMovement, scaledMovement.Length());
         }
     }
 
