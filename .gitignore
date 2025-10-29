@@ -36,7 +36,6 @@ PublishProfiles/
 .vs/
 .vscode/
 .idea/
-.config/
 AppPackages
 *.cache
 .editorconfig
