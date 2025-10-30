@@ -21,7 +21,7 @@ public class SceneManager
     {
         _graphicsDevice = graphicsDevice;
         _viewportAdapter = new(graphicsDevice);
-        _camera = camera ?? new PerspectiveCamera(_viewportAdapter);
+        _camera = camera ?? new QuaternionCamera(_viewportAdapter);
 
         _depthStencilState = new DepthStencilState
         {

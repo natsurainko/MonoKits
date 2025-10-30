@@ -57,8 +57,8 @@ public partial class Game3DLayer : UIElement
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
 
-        Camera.CameraMode = CameraMode.ThirdPerson;
-        Camera.TargetDistance = 25;
+        Camera.CameraMode = CameraMode.Free;
+        Camera.BaseTargetDistance = 25;
         Camera.Target(_player);
     }
 
@@ -95,6 +95,12 @@ public partial class Game3DLayer : UIElement
             Vector3 scaledMovement = _cameraMovementDirection * _moveSpeed * deltaTime;
             Camera.Move(scaledMovement);
         }
+
+        if (_cameraRoll != 0.0f)
+        {
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Camera?.Rotate(new(0, 0, (float)_mouseSensitivity * _cameraRoll * _moveSpeed * deltaTime));
+        }
     }
 
     protected override void DrawOverride(GameTime gameTime)
@@ -107,6 +113,8 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 {
     private Vector3 _playerMovementDirection = Vector3.Zero;
     private Vector3 _cameraMovementDirection = Vector3.Zero;
+
+    private int _cameraRoll = 0;
 
     public bool Focusable => true;
 
@@ -140,6 +148,10 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 
         else if (e.Key == Keys.F5)
             Camera.CameraMode = (CameraMode)(((int)Camera.CameraMode + 1) % 3);
+        else if (e.Key == Keys.NumPad4)
+            _cameraRoll = -1;
+        else if (e.Key == Keys.NumPad6)
+            _cameraRoll = 1;
     }
 
     void IKeyboardInputReceiver.OnKeyReleased(in KeyboardEventArgs e)
@@ -157,6 +169,9 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
             _cameraMovementDirection.X = 0;
         else if (e.Key == Keys.Add || e.Key == Keys.Subtract)
             _cameraMovementDirection.Y = 0;
+
+        else if (e.Key == Keys.NumPad4 || e.Key == Keys.NumPad6)
+            _cameraRoll = 0;
     }
 
     void IMouseInputReceiver.OnMouseMove(in MouseEventArgs e)
@@ -165,6 +180,7 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 
         double deltaX = (e.CurrentState.X - _screenCenter.X) * _mouseSensitivity / _screenCenter.X;
         double deltaY = (e.CurrentState.Y - _screenCenter.Y) * _mouseSensitivity / _screenCenter.Y;
+        
 
         if (deltaX == 0 && deltaY == 0) return;
 
@@ -176,6 +192,11 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
             Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
 
         Mouse.SetPosition(_screenCenter.X, _screenCenter.Y);
+    }
+
+    void IMouseInputReceiver.OnMouseWheelMoved(in MouseEventArgs e)
+    {
+        double deltaScroll = e.ScrollWheelDelta;
     }
 
     void IFocusableElement.OnGotFocus()

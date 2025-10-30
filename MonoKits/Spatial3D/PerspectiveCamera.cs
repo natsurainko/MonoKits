@@ -18,7 +18,7 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, 
     public float FarPlane { get; set; } = 1000f;
 
     public CameraMode CameraMode { get; set; } = CameraMode.Free;
-    public float TargetDistance { get; set; } = 0.0f;
+    public float BaseTargetDistance { get; set; } = 0.0f;
 
     public void GetViewMatrix(out Matrix matrix)
     {
@@ -45,7 +45,7 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, 
         }
         else if (CameraMode == CameraMode.ThirdPerson && _targetObject != null)
         {
-            cameraPosition = _targetObject.Position - forward * TargetDistance;
+            cameraPosition = _targetObject.Position - forward * BaseTargetDistance;
             cameraTarget = _targetObject.Position;
         }
         else
@@ -92,6 +92,11 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, 
     /// </summary>
     /// <param name="angles"></param>
     public override void Rotate(Vector3 angles) => _rotationAccumulator += new Vector3(angles.X, angles.Y, angles.Z);
+
+    public void Zoom(float value)
+    {
+
+    }
 
     public void Target(GameObject3D? target) => _targetObject = target;
 }

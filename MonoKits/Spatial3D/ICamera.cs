@@ -8,7 +8,7 @@ public interface ICamera
     Vector3 Rotation { get; set; }
 
     CameraMode CameraMode { get; set; }
-    float TargetDistance { get; set; }
+    float BaseTargetDistance { get; set; }
 
     float FieldOfView { get; }
     float AspectRatio { get; }
