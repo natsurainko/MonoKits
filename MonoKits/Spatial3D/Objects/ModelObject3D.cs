@@ -8,69 +8,17 @@ public partial class ModelObject3D : GameObject3D
 {
     public Model Model { get; }
 
-    /// <summary>
-    /// angles = (pitch, yaw, roll)
-    /// </summary>
-    public override Vector3 Rotation
-    {
-        get => field;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                UpdateWorldMatrix();
-                UpdateBoundingSphere();
-                UpdateBoundingBox();
-            }
-        }
-    } = Vector3.Zero;
-
-    public override Vector3 Scale
-    {
-        get => field;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                UpdateWorldMatrix();
-                UpdateBoundingSphere();
-                UpdateBoundingBox();
-            }
-        }
-    } = Vector3.One;
-
-    public override Vector3 Position
-    {
-        get => field;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                UpdateWorldMatrix();
-                UpdateBoundingSphere();
-                UpdateBoundingBox();
-            }
-        }
-    } = Vector3.Zero;
-
-    public ModelObject3D(Model model)
+    public ModelObject3D(Model model) : base()
     {
         Model = model;
         UpdateWorldMatrix();
     }
 
-    public BoundingSphere BoundingSphere { get; private set; }
-
-    public BoundingBox BoundingBox { get; private set; }
-
-    public override void Draw(GraphicsDevice graphicsDevice, GameTime gameTime, Matrix view, Matrix projection)
+    public override void Draw(GraphicsDevice graphicsDevice, Effect sharedEffect, Matrix view, Matrix projection)
     {
         foreach (ModelMesh mesh in Model.Meshes)
         {
-            foreach (BasicEffect effect in mesh.Effects.OfType<BasicEffect>())
+            foreach (IEffectMatrices effect in mesh.Effects.OfType<IEffectMatrices>())
             {
                 effect.World = _worldMatrix;
                 effect.View = view;
@@ -91,39 +39,6 @@ public partial class ModelObject3D : GameObject3D
                 effect.PreferPerPixelLighting = true;
             }
         }
-    }
-}
-
-public partial class ModelObject3D
-{
-    protected virtual void UpdateBoundingBox()
-    {
-        BoundingBox = BoundingBox.CreateFromSphere(BoundingSphere.Transform(_worldMatrix));
-    }
-
-    protected virtual void UpdateBoundingSphere()
-    {
-        BoundingSphere sphere = BoundingSphere;
-        sphere.Center = Position;
-        BoundingSphere = sphere;
-    }
-
-    protected virtual BoundingSphere CreateBoundingSphere()
-    {
-        BoundingSphere sphere = new()
-        {
-            Center = Position
-        };
-
-        foreach (ModelMesh mesh in Model.Meshes)
-        {
-            if (sphere.Radius == 0)
-                sphere = mesh.BoundingSphere;
-            else
-                sphere = BoundingSphere.CreateMerged(sphere, mesh.BoundingSphere);
-        }
-
-        return sphere;
     }
 }
 

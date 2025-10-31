@@ -1,15 +1,22 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.ViewportAdapters;
+using MonoKits.Extensions;
 using MonoKits.Spatial3D.Camera;
+using MonoKits.Spatial3D.Collision;
 
 namespace MonoKits.Spatial3D;
 
 public class SceneManager
 {
+    private readonly ICamera _camera;
+    private readonly BasicEffect _effect;
+
+    private Matrix _viewMatrix;
+    private Matrix _projectionMatrix;
+
     private readonly GraphicsDevice _graphicsDevice;
     private readonly DefaultViewportAdapter _viewportAdapter;
-    private readonly ICamera _camera;
 
     private readonly DepthStencilState _depthStencilState;
     private readonly List<GameObject3D> sceneObjects = [];
@@ -18,11 +25,13 @@ public class SceneManager
 
     public float FieldOfView { get; set; } = MathHelper.ToRadians(45);
 
+    public bool ShowBoundingBox { get; set; } = false;
+
     public SceneManager(GraphicsDevice graphicsDevice, ICamera? camera = default)
     {
         _graphicsDevice = graphicsDevice;
         _viewportAdapter = new(graphicsDevice);
-        _camera = camera ?? new QuaternionPerspectiveCamera(_viewportAdapter);
+        _camera = camera ?? new PerspectiveCamera(_viewportAdapter);
 
         _depthStencilState = new DepthStencilState
         {
@@ -30,6 +39,9 @@ public class SceneManager
             DepthBufferWriteEnable = true,
             DepthBufferFunction = CompareFunction.LessEqual
         };
+
+        _effect = new BasicEffect(_graphicsDevice);
+        _effect.VertexColorEnabled = true;
     }
 
     public void AddObject(GameObject3D obj) => sceneObjects.Add(obj);
@@ -40,15 +52,13 @@ public class SceneManager
 
     public void Update(GameTime gameTime)
     {
-        Camera.GetViewMatrix(out viewMatrix);
-        Camera.GetProjectionMatrix(out viewProjectionMatrix);
+        Camera.GetViewMatrix(out _viewMatrix);
+        Camera.GetProjectionMatrix(out _projectionMatrix);
 
         foreach (var object3D in sceneObjects)
             object3D.Update(gameTime);
     }
 
-    Matrix viewMatrix;
-    Matrix viewProjectionMatrix;
 
     public void Draw(GameTime gameTime)
     {
@@ -60,7 +70,15 @@ public class SceneManager
         _graphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Black, 1.0f, 0);
 
         foreach (var object3D in sceneObjects)
-            object3D.Draw(_graphicsDevice, gameTime, viewMatrix, viewProjectionMatrix);
+        {
+            object3D.Draw(_graphicsDevice, _effect, _viewMatrix, _projectionMatrix);
+
+            if (ShowBoundingBox && object3D is ICollidable collidable)
+            {
+                collidable.DrawBoundingBox(_graphicsDevice, _effect, _viewMatrix, object3D.WorldMatrix, _projectionMatrix);
+                object3D.DrawRotation(_graphicsDevice, _effect, _viewMatrix, _projectionMatrix);
+            }
+        }
 
         _graphicsDevice.DepthStencilState = oldDepthStencilState;
         _graphicsDevice.RasterizerState = oldRasterizerState;

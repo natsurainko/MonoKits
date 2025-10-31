@@ -33,6 +33,7 @@ public partial class Game3DLayer : UIElement
     {
         _game = game;
         _sceneManager = new(game.GraphicsDevice);
+        _sceneManager.ShowBoundingBox = true;
         _screenCenter = new Point(
             _game.GraphicsDevice.Viewport.Width / 2,
             _game.GraphicsDevice.Viewport.Height / 2
@@ -55,6 +56,8 @@ public partial class Game3DLayer : UIElement
         _sceneManager.AddObject(_ground);
         _sceneManager.AddObject(_board);
         _sceneManager.AddObject(_player);
+
+        _sceneManager.AddObject(new LineObject3D(new(0, 5, 0), new(MathHelper.PiOver2, 0, 0), 5.0f));
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
 

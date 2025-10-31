@@ -7,6 +7,8 @@ public abstract partial class GameObject3D
 {
     protected Matrix _worldMatrix;
 
+    public Matrix WorldMatrix => _worldMatrix;
+
     /// <summary>
     /// angles = (pitch, yaw, roll)
     /// </summary>
@@ -56,7 +58,7 @@ public abstract partial class GameObject3D
 
     public virtual void Update(GameTime gameTime) { }
 
-    public virtual void Draw(GraphicsDevice graphicsDevice, GameTime gameTime, Matrix view, Matrix projection) { }
+    public virtual void Draw(GraphicsDevice graphicsDevice, Effect sharedEffect, Matrix view, Matrix projection) { }
 
     /// <summary>
     /// Move the object in its relative orientation
@@ -102,5 +104,9 @@ public partial class GameObject3D
             Matrix.CreateRotationY(Rotation.Y) *
             Matrix.CreateRotationZ(Rotation.Z) *
             Matrix.CreateTranslation(Position);
+
+        OnWorldMatrixChanged();
     }
+
+    protected virtual void OnWorldMatrixChanged() { }
 }
