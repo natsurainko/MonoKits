@@ -4,15 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKits.Spatial3D.Objects;
 
-public partial class ModelObject3D : GameObject3D
+public partial class ModelObject3D(Model model) : GameObject3D()
 {
-    public Model Model { get; }
-
-    public ModelObject3D(Model model) : base()
-    {
-        Model = model;
-        UpdateWorldMatrix();
-    }
+    public Model Model { get; } = model;
 
     public override void Draw(GraphicsDevice graphicsDevice, Effect sharedEffect, Matrix view, Matrix projection)
     {

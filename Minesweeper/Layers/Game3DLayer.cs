@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Minesweeper.Game3D;
+using MonoGame.Extended.Graphics;
 using MonoKits.Components;
 using MonoKits.Gui;
 using MonoKits.Gui.Input;
@@ -24,6 +25,7 @@ public partial class Game3DLayer : UIElement
     private ModelObject3D? _ground;
     private ModelObject3D? _board;
     private ModelObject3D? _house;
+    private SpriteObject3D? _sprite;
 
     private Player? _player;
 
@@ -52,9 +54,13 @@ public partial class Game3DLayer : UIElement
         _ground = ModelObject3D.LoadFromContent(_game.Content, "Models/Starvalley");
         _board = ModelObject3D.LoadFromContent(_game.Content, "Models/Board");
         _house = ModelObject3D.LoadFromContent(_game.Content, "Models/House");
+        _sprite = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/title.png");
         _player = new Player(_game.Content.Load<Model>("Models/Block"));
 
-        //_house.Scale = new Vector3(1, 2.054f, 1);
+        _sprite.Position = new Vector3(0, 10, 0);
+        _sprite.Size = new Vector2(4.8f, 1.2f);
+        _sprite.Billboard = SpriteObject3D.BillboardMode.CameraBillboard;
+
         _house.Position = new Vector3(0, 3.5f, 10);
 
         _ground.EnableDefaultLighting();
@@ -63,9 +69,10 @@ public partial class Game3DLayer : UIElement
         _player.EnableDefaultLighting();
 
         _sceneManager.AddObject(_ground);
-        //_sceneManager.AddObject(_board);
+        _sceneManager.AddObject(_board);
         _sceneManager.AddObject(_house);
         _sceneManager.AddObject(_player);
+        _sceneManager.AddObject(_sprite);
 
         _sceneManager.AddObject(new LineObject3D(new(0, 0, 0), new(MathHelper.PiOver2, 0, 0), 5.0f));
 
