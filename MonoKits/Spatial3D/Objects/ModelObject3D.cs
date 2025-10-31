@@ -44,9 +44,5 @@ public partial class ModelObject3D : GameObject3D
 
 public partial class ModelObject3D
 {
-    public static ModelObject3D LoadFromContent(ContentManager content, string modelPath)
-    {
-        Model model = content.Load<Model>(modelPath);
-        return new ModelObject3D(model);
-    }
+    public static ModelObject3D LoadFromContent(ContentManager content, string modelPath) => new(content.Load<Model>(modelPath));
 }

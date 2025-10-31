@@ -15,6 +15,9 @@ public class MainGame : GameApplication
         IsMouseVisible = true;
         Window.AllowUserResizing = true;
 
+        GraphicsDeviceManager.PreferMultiSampling = true;
+        GraphicsDeviceManager.PreparingDeviceSettings += (s, e) => e.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = 4;
+
         //GraphicsDeviceManager.PreferredBackBufferWidth = 1920;
         //GraphicsDeviceManager.PreferredBackBufferHeight = 1080;
 

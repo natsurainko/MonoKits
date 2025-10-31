@@ -23,6 +23,8 @@ public partial class Game3DLayer : UIElement
 
     private ModelObject3D? _ground;
     private ModelObject3D? _board;
+    private ModelObject3D? _house;
+
     private Player? _player;
 
     private Point _screenCenter;
@@ -45,21 +47,27 @@ public partial class Game3DLayer : UIElement
         GuiComponent.KeyboardInputManager.RegisterOnFocused(this);
         GuiComponent.MouseInputManager.Register(this);
 
-        _ground = ModelObject3D.LoadFromContent(_game.Content, "Models/Test");
+        _game.Window.ClientSizeChanged += OnClientSizeChanged;
+
+        _ground = ModelObject3D.LoadFromContent(_game.Content, "Models/Starvalley");
         _board = ModelObject3D.LoadFromContent(_game.Content, "Models/Board");
+        _house = ModelObject3D.LoadFromContent(_game.Content, "Models/House");
         _player = new Player(_game.Content.Load<Model>("Models/Block"));
+
+        //_house.Scale = new Vector3(1, 2.054f, 1);
+        _house.Position = new Vector3(0, 3.5f, 10);
 
         _ground.EnableDefaultLighting();
         _board.EnableDefaultLighting();
+        _house.EnableDefaultLighting();
         _player.EnableDefaultLighting();
 
         _sceneManager.AddObject(_ground);
-        _sceneManager.AddObject(_board);
+        //_sceneManager.AddObject(_board);
+        _sceneManager.AddObject(_house);
         _sceneManager.AddObject(_player);
 
-        _sceneManager.AddObject(new LineObject3D(new(0, 5, 0), new(MathHelper.PiOver2, 0, 0), 5.0f));
-
-        _game.Window.ClientSizeChanged += OnClientSizeChanged;
+        _sceneManager.AddObject(new LineObject3D(new(0, 0, 0), new(MathHelper.PiOver2, 0, 0), 5.0f));
 
         Camera.CameraMode = CameraMode.Free;
         Camera.BaseTargetDistance = 25;
