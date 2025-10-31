@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoGame.Extended.ViewportAdapters;
 
-namespace MonoKits.Spatial3D;
+namespace MonoKits.Spatial3D.Camera;
 
-public class QuaternionCamera(ViewportAdapter viewportAdapter) : GameObject3D, ICamera
+public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, ICamera
 {
     private readonly ViewportAdapter _viewportAdapter = viewportAdapter;
     private GameObject3D? _targetObject;

@@ -1,4 +1,4 @@
-﻿namespace MonoKits.Spatial3D;
+﻿namespace MonoKits.Spatial3D.Camera;
 
 public enum CameraMode
 {

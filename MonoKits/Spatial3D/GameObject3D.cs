@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace MonoKits.Spatial3D;
 
@@ -55,7 +56,7 @@ public abstract partial class GameObject3D
 
     public virtual void Update(GameTime gameTime) { }
 
-    public virtual void Draw(GameTime gameTime, Matrix view, Matrix projection) { }
+    public virtual void Draw(GraphicsDevice graphicsDevice, GameTime gameTime, Matrix view, Matrix projection) { }
 
     /// <summary>
     /// Move the object in its relative orientation

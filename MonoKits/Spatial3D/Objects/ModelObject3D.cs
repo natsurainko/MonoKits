@@ -66,11 +66,11 @@ public partial class ModelObject3D : GameObject3D
 
     public BoundingBox BoundingBox { get; private set; }
 
-    public override void Draw(GameTime gameTime, Matrix view, Matrix projection)
+    public override void Draw(GraphicsDevice graphicsDevice, GameTime gameTime, Matrix view, Matrix projection)
     {
         foreach (ModelMesh mesh in Model.Meshes)
         {
-            foreach (BasicEffect effect in mesh.Effects.Cast<BasicEffect>())
+            foreach (BasicEffect effect in mesh.Effects.OfType<BasicEffect>())
             {
                 effect.World = _worldMatrix;
                 effect.View = view;
@@ -85,7 +85,7 @@ public partial class ModelObject3D : GameObject3D
     {
         foreach (ModelMesh mesh in Model.Meshes)
         {
-            foreach (BasicEffect effect in mesh.Effects.Cast<BasicEffect>())
+            foreach (BasicEffect effect in mesh.Effects.OfType<BasicEffect>())
             {
                 effect.EnableDefaultLighting();
                 effect.PreferPerPixelLighting = true;
@@ -129,7 +129,7 @@ public partial class ModelObject3D
 
 public partial class ModelObject3D
 {
-    public static ModelObject3D LoadContent(ContentManager content, string modelPath)
+    public static ModelObject3D LoadFromContent(ContentManager content, string modelPath)
     {
         Model model = content.Load<Model>(modelPath);
         return new ModelObject3D(model);

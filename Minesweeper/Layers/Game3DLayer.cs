@@ -7,6 +7,7 @@ using MonoKits.Gui;
 using MonoKits.Gui.Input;
 using MonoKits.Overrides;
 using MonoKits.Spatial3D;
+using MonoKits.Spatial3D.Camera;
 using MonoKits.Spatial3D.Objects;
 
 namespace Minesweeper.Layers;
@@ -43,8 +44,8 @@ public partial class Game3DLayer : UIElement
         GuiComponent.KeyboardInputManager.RegisterOnFocused(this);
         GuiComponent.MouseInputManager.Register(this);
 
-        _ground = ModelObject3D.LoadContent(_game.Content, "Models/Test");
-        _board = ModelObject3D.LoadContent(_game.Content, "Models/Board");
+        _ground = ModelObject3D.LoadFromContent(_game.Content, "Models/Test");
+        _board = ModelObject3D.LoadFromContent(_game.Content, "Models/Board");
         _player = new Player(_game.Content.Load<Model>("Models/Block"));
 
         _ground.EnableDefaultLighting();

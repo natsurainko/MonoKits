@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.ViewportAdapters;
+using MonoKits.Spatial3D.Camera;
 
 namespace MonoKits.Spatial3D;
 
@@ -21,7 +22,7 @@ public class SceneManager
     {
         _graphicsDevice = graphicsDevice;
         _viewportAdapter = new(graphicsDevice);
-        _camera = camera ?? new QuaternionCamera(_viewportAdapter);
+        _camera = camera ?? new QuaternionPerspectiveCamera(_viewportAdapter);
 
         _depthStencilState = new DepthStencilState
         {
@@ -59,7 +60,7 @@ public class SceneManager
         _graphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Black, 1.0f, 0);
 
         foreach (var object3D in sceneObjects)
-            object3D.Draw(gameTime, viewMatrix, viewProjectionMatrix);
+            object3D.Draw(_graphicsDevice, gameTime, viewMatrix, viewProjectionMatrix);
 
         _graphicsDevice.DepthStencilState = oldDepthStencilState;
         _graphicsDevice.RasterizerState = oldRasterizerState;

@@ -2,7 +2,7 @@
 using MonoGame.Extended.ViewportAdapters;
 using MonoKits.Extensions;
 
-namespace MonoKits.Spatial3D;
+namespace MonoKits.Spatial3D.Camera;
 
 public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, ICamera
 {

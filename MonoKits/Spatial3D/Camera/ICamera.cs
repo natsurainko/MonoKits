@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace MonoKits.Spatial3D;
+namespace MonoKits.Spatial3D.Camera;
 
 public interface ICamera
 {
