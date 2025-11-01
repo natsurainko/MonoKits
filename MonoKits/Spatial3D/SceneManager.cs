@@ -11,12 +11,10 @@ public class SceneManager
 {
     private readonly ICamera _camera;
     private readonly BasicEffect _effect;
+    private readonly GraphicsDevice _graphicsDevice;
 
     private Matrix _viewMatrix;
     private Matrix _projectionMatrix;
-
-    private readonly GraphicsDevice _graphicsDevice;
-    private readonly DefaultViewportAdapter _viewportAdapter;
 
     private readonly DepthStencilState _depthStencilState;
     private readonly List<GameObject3D> sceneObjects = [];
@@ -30,8 +28,7 @@ public class SceneManager
     public SceneManager(GraphicsDevice graphicsDevice, ICamera? camera = default)
     {
         _graphicsDevice = graphicsDevice;
-        _viewportAdapter = new(graphicsDevice);
-        _camera = camera ?? new PerspectiveCamera(_viewportAdapter);
+        _camera = camera ?? new PerspectiveCamera(new DefaultViewportAdapter(graphicsDevice));
 
         _depthStencilState = new DepthStencilState
         {

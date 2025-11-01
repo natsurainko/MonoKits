@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Minesweeper.Game3D;
-using MonoGame.Extended.Graphics;
+using MonoGame.Extended.ViewportAdapters;
 using MonoKits.Components;
 using MonoKits.Gui;
 using MonoKits.Gui.Input;
@@ -10,6 +10,7 @@ using MonoKits.Overrides;
 using MonoKits.Spatial3D;
 using MonoKits.Spatial3D.Camera;
 using MonoKits.Spatial3D.Objects;
+using System.Collections.Generic;
 
 namespace Minesweeper.Layers;
 
@@ -36,7 +37,7 @@ public partial class Game3DLayer : UIElement
     public Game3DLayer(Game game)
     {
         _game = game;
-        _sceneManager = new(game.GraphicsDevice);
+        _sceneManager = new(game.GraphicsDevice, new QuaternionPerspectiveCamera(new DefaultViewportAdapter(game.GraphicsDevice)));
         _sceneManager.ShowBoundingBox = true;
         _screenCenter = new Point(
             _game.GraphicsDevice.Viewport.Width / 2,
@@ -99,7 +100,65 @@ public partial class Game3DLayer : UIElement
 
     public override void Update(GameTime gameTime)
     {
-        _sceneManager.Update(gameTime);
+        if (_pressingKeys.Count != 0)
+        {
+            Vector2 xFlag = Vector2.Zero;
+            Vector2 yFlag = Vector2.Zero;
+            Vector2 zFlag = Vector2.Zero;
+            Vector2 rollFlag = Vector2.Zero;
+
+            if (_pressingKeys.Contains(Keys.A))
+                zFlag.Y = 1;
+            if (_pressingKeys.Contains(Keys.D))
+                zFlag.X = 1;
+            if (_pressingKeys.Contains(Keys.S))
+                xFlag.Y = 1;
+            if (_pressingKeys.Contains(Keys.W))
+                xFlag.X = 1;
+            if (_pressingKeys.Contains(Keys.Space))
+                yFlag.X = 1;
+            if (_pressingKeys.Contains(Keys.LeftShift))
+                yFlag.Y = 1;
+
+            _playerMovementDirection.Z = zFlag.X - zFlag.Y;
+            _playerMovementDirection.X = xFlag.X - xFlag.Y;
+            _playerMovementDirection.Y = yFlag.X - yFlag.Y;
+
+            xFlag = Vector2.Zero;
+            yFlag = Vector2.Zero;
+            zFlag = Vector2.Zero;
+
+            if (_pressingKeys.Contains(Keys.Left))
+                zFlag.Y = 1;
+            if (_pressingKeys.Contains(Keys.Right))
+                zFlag.X = 1;
+            if (_pressingKeys.Contains(Keys.Up))
+                xFlag.X = 1;
+            if (_pressingKeys.Contains(Keys.Down))
+                xFlag.Y = 1;
+            if (_pressingKeys.Contains(Keys.Add))
+                yFlag.X = 1;
+            if (_pressingKeys.Contains(Keys.Subtract))
+                yFlag.Y = 1;
+
+            if (_pressingKeys.Contains(Keys.NumPad4))
+                rollFlag.Y = 1;
+            if (_pressingKeys.Contains(Keys.NumPad6))
+                rollFlag.X = 1;
+
+            _cameraMovementDirection.Z = zFlag.X - zFlag.Y;
+            _cameraMovementDirection.X = xFlag.X - xFlag.Y;
+            _cameraMovementDirection.Y = yFlag.X - yFlag.Y;
+            _cameraRoll = rollFlag.X - rollFlag.Y;
+        }
+        else
+        {
+            _playerMovementDirection = Vector3.Zero;
+            _cameraMovementDirection = Vector3.Zero;
+            _cameraRoll = 0;
+        }
+
+            _sceneManager.Update(gameTime);
 
         if (_playerMovementDirection != Vector3.Zero && _player != null)
         {
@@ -130,67 +189,25 @@ public partial class Game3DLayer : UIElement
 
 public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyboardInputReceiver
 {
+    private readonly List<Keys> _pressingKeys = [];
+
     private Vector3 _playerMovementDirection = Vector3.Zero;
     private Vector3 _cameraMovementDirection = Vector3.Zero;
-
-    private int _cameraRoll = 0;
+    float _cameraRoll = 0;
 
     public bool Focusable => true;
 
     void IKeyboardInputReceiver.OnKeyPressed(in KeyboardEventArgs e)
     {
-        if (e.Key == Keys.A)
-            _playerMovementDirection.Z = -1;
-        else if (e.Key == Keys.D)
-            _playerMovementDirection.Z = 1;
-        else if (e.Key == Keys.S)
-            _playerMovementDirection.X = -1;
-        else if (e.Key == Keys.W)
-            _playerMovementDirection.X = 1;
-        else if (e.Key == Keys.Space)
-            _playerMovementDirection.Y = 1;
-        else if (e.Key == Keys.LeftShift)
-            _playerMovementDirection.Y = -1;
+        if (!_pressingKeys.Contains(e.Key)) _pressingKeys.Add(e.Key);
 
-        if (e.Key == Keys.Left)
-            _cameraMovementDirection.Z = -1;
-        else if (e.Key == Keys.Right)
-            _cameraMovementDirection.Z = 1;
-        else if (e.Key == Keys.Up)
-            _cameraMovementDirection.X = 1;
-        else if (e.Key == Keys.Down)
-            _cameraMovementDirection.X = -1;
-        else if (e.Key == Keys.Add)
-            _cameraMovementDirection.Y = 1;
-        else if (e.Key == Keys.Subtract)
-            _cameraMovementDirection.Y = -1;
-
-        else if (e.Key == Keys.F5)
+        if (e.Key == Keys.F5)
             Camera.CameraMode = (CameraMode)(((int)Camera.CameraMode + 1) % 3);
-        else if (e.Key == Keys.NumPad4)
-            _cameraRoll = -1;
-        else if (e.Key == Keys.NumPad6)
-            _cameraRoll = 1;
     }
 
     void IKeyboardInputReceiver.OnKeyReleased(in KeyboardEventArgs e)
     {
-        if (e.Key == Keys.A || e.Key == Keys.D)
-            _playerMovementDirection.Z = 0;
-        else if (e.Key == Keys.S || e.Key == Keys.W)
-            _playerMovementDirection.X = 0;
-        else if (e.Key == Keys.Space || e.Key == Keys.LeftShift)
-            _playerMovementDirection.Y = 0;
-
-        if (e.Key == Keys.Left || e.Key == Keys.Right)
-            _cameraMovementDirection.Z = 0;
-        else if (e.Key == Keys.Down || e.Key == Keys.Up)
-            _cameraMovementDirection.X = 0;
-        else if (e.Key == Keys.Add || e.Key == Keys.Subtract)
-            _cameraMovementDirection.Y = 0;
-
-        else if (e.Key == Keys.NumPad4 || e.Key == Keys.NumPad6)
-            _cameraRoll = 0;
+        _pressingKeys.Remove(e.Key);
     }
 
     void IMouseInputReceiver.OnMouseMove(in MouseEventArgs e)

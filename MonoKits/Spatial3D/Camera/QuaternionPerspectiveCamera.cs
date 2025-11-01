@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoGame.Extended.ViewportAdapters;
+using MonoKits.Extensions;
 
 namespace MonoKits.Spatial3D.Camera;
 
@@ -13,7 +14,7 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
     private Quaternion _quaternionTarget = Quaternion.Identity;
     private Quaternion _quaternionNow = Quaternion.Identity;
 
-    private bool _usePositionLerp = false;
+    private bool _useSmoothLerp = false;
 
     private Vector3 _movementAccumulator = Vector3.Zero;
     private Vector3 _rotationAccumulator = Vector3.Zero;
@@ -70,75 +71,77 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
     public void GetProjectionMatrix(out Matrix matrix) => matrix = Matrix.CreatePerspectiveFieldOfView(FieldOfView, AspectRatio, NearPlane, FarPlane);
     public void GetViewMatrix(out Matrix matrix) 
     {
+        //切换人称检测
         if (oldCameraMode != CameraMode)
         {
-            _usePositionLerp = true;
+            _useSmoothLerp = true;
             oldCameraMode = CameraMode;
         }
 
         UpdateRotation();
-        Vector3 targetPosition = UpdatePosition();
-        matrix = Matrix.CreateLookAt(_positionNow, targetPosition, UpNow);
+        UpdatePosition();
+
+        matrix = Matrix.CreateLookAt(_positionNow, _positionNow + ForwardNow, UpNow);
     } 
 
     private void UpdateRotation()
     {
+        //更新最终朝向
         if (CameraMode == CameraMode.FirstPerson && _targetObject != null)
         {
-            RotateToEluer(_targetObject.Rotation.X, _targetObject.Rotation.Y, _targetObject.Rotation.Z);
+            Rotation = _targetObject.Rotation;
+            RotateToEluer(Rotation.X, Rotation.Y, Rotation.Z);
         }
         else if (_rotationAccumulator != Vector3.Zero)
         {
             base.Rotate(_rotationAccumulator);
-            RotateToEluer(Rotation.X, Rotation.Y, Rotation.Z);
-
             _rotationAccumulator = Vector3.Zero;
+            RotateToEluer(Rotation.X, Rotation.Y, Rotation.Z);
         }
-
-        //旋转插值
-        if (_quaternionNow != _quaternionTarget) _quaternionNow = Quaternion.Lerp(_quaternionNow, _quaternionTarget, 0.5f);
+        
+        //旋转插值，更新当前的虚拟朝向
+        if (_quaternionNow != _quaternionTarget)
+        {
+            if (_useSmoothLerp)
+                _quaternionNow = Quaternion.Slerp(_quaternionNow, _quaternionTarget, 0.1f);
+            else if ((_quaternionNow - _quaternionTarget).Length() > 0.001f)
+                _quaternionNow = Quaternion.Slerp(_quaternionNow, _quaternionTarget, 0.5f);
+            else
+                _quaternionNow = _quaternionTarget;
+        }
     }
-    private Vector3 UpdatePosition()
+    private void UpdatePosition()
     {
-        Vector3 targetPosition;
+        //更新最终位置
         if (CameraMode == CameraMode.FirstPerson && _targetObject != null)
         {
             Position = _targetObject.Position;
-            targetPosition = _targetObject.Position + ForwardNow;
         }
         else if (CameraMode == CameraMode.ThirdPerson && _targetObject != null)
         {
             Position = _targetObject.Position - ForwardNow * BaseTargetDistance;
-            targetPosition = _targetObject.Position;
         }
         else
         {
             if (_movementAccumulator != Vector3.Zero)
             {
-                Position += ForwardNow * _movementAccumulator.X;
-                Position += RightNow * _movementAccumulator.Z;
-                Position += UpNow * _movementAccumulator.Y;
+                Position += ForwardTarget * _movementAccumulator.X;
+                Position += RightTarget * _movementAccumulator.Z;
+                Position += UpTarget * _movementAccumulator.Y;
 
                 _movementAccumulator = Vector3.Zero;
             }
-
-            targetPosition = Position + ForwardNow;
         }
 
-        //切换人称时或高速移动时，移动插值
-        float d = (_positionNow - Position).Length();
-        if (d > 5) _usePositionLerp = true;
-        if (_usePositionLerp && d > 0.05f)
+        //切换人称时，移动插值，更新当前虚拟位置
+        if (!_useSmoothLerp || (_positionNow - Position).Length() < 0.1f || CameraMode == CameraMode.Free)
         {
-            _positionNow = Vector3.Lerp(_positionNow, Position, 0.1f);
-        }
-        else
-        {
-            _usePositionLerp = false;
             _positionNow = Position;
+            _useSmoothLerp = false;
+            return;
         }
 
-        return targetPosition;
+        _positionNow = Vector3.Lerp(_positionNow, Position, 0.1f);
     }
 
     public void Reset()
