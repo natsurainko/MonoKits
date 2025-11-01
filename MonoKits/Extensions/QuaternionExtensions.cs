@@ -36,18 +36,25 @@ public static class QuaternionExtensions
 
     public static Vector3 ToEuler(this Quaternion q)
     {
-        float xx = q.X;
-        float yy = q.Y;
-        float zz = q.Z;
-        float ww = q.W;
-        float xsq = xx * xx;
-        float ysq = yy * yy;
-        float zsq = zz * zz;
+        Vector3 angles = Vector3.Zero;
 
-        return new(
-            MathF.Atan2(2.0f * (xx * ww - yy * zz), 1.0f - 2.0f * (xsq + zsq)),
-            MathF.Atan2(2.0f * (yy * ww + xx * zz), 1.0f - 2.0f * (ysq + zsq)),
-            MathF.Asin(2.0f * (xx * yy + zz * ww))
-        );
+        // 绕X轴旋转的角度 (Pitch)
+        float sinPitch = 2.0f * (q.W * q.X + q.Y * q.Z);
+        float cosPitch = 1.0f - 2.0f * (q.X * q.X + q.Y * q.Y);
+        angles.X = MathF.Atan2(sinPitch, cosPitch);
+
+        // 绕Y轴旋转的角度 (Yaw)
+        float sinYaw = 2.0f * (q.W * q.Y - q.Z * q.X);
+        if (MathF.Abs(sinYaw) >= 1.0f)
+            angles.Y = (MathF.PI / 2.0f * MathF.Sign(sinYaw)); // 90度处理
+        else
+            angles.Y = MathF.Asin(sinYaw);
+
+        // 绕Z轴旋转的角度 (Roll)
+        float sinRoll = 2.0f * (q.W * q.Z + q.X * q.Y);
+        float cosRoll = 1.0f - 2.0f * (q.Y * q.Y + q.Z * q.Z);
+        angles.Z = MathF.Atan2(sinRoll, cosRoll);
+
+        return angles;
     }
 }

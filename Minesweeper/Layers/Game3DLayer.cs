@@ -27,6 +27,7 @@ public partial class Game3DLayer : UIElement
     private ModelObject3D? _board;
     private ModelObject3D? _house;
     private SpriteObject3D? _sprite;
+    private SpriteObject3D? _bait;
 
     private Player? _player;
 
@@ -56,11 +57,16 @@ public partial class Game3DLayer : UIElement
         _board = ModelObject3D.LoadFromContent(_game.Content, "Models/Board");
         _house = ModelObject3D.LoadFromContent(_game.Content, "Models/House");
         _sprite = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/title.png");
+        _bait = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/bait.png");
         _player = new Player(_game.Content.Load<Model>("Models/Block"));
 
-        _sprite.Position = new Vector3(0, 10, 0);
+        _sprite.Position = new Vector3(10, 10, 10);
         _sprite.Size = new Vector2(4.8f, 1.2f);
         _sprite.Billboard = SpriteObject3D.BillboardMode.CameraBillboard;
+
+        _bait.Position = new Vector3(0, 10, 0);
+        _bait.Size = new Vector2(4f, 1f);
+        _bait.Billboard = SpriteObject3D.BillboardMode.CylindricalBillboard;
 
         _house.Position = new Vector3(0, 3.5f, 10);
 
@@ -74,6 +80,7 @@ public partial class Game3DLayer : UIElement
         _sceneManager.AddObject(_house);
         _sceneManager.AddObject(_player);
         _sceneManager.AddObject(_sprite);
+        _sceneManager.AddObject(_bait);
 
         _sceneManager.AddObject(new LineObject3D(new(0, 0, 0), new(MathHelper.PiOver2, 0, 0), 5.0f));
 

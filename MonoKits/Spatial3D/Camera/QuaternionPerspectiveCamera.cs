@@ -95,6 +95,7 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
         else if (_rotationAccumulator != Vector3.Zero)
         {
             base.Rotate(_rotationAccumulator);
+            //_targetObject?.Rotation = Rotation;
             _rotationAccumulator = Vector3.Zero;
             RotateToEluer(Rotation.X, Rotation.Y, Rotation.Z);
         }
