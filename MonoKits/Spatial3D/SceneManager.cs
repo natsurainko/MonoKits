@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.ViewportAdapters;
 using MonoKits.Extensions;
 using MonoKits.Spatial3D.Camera;
-using MonoKits.Spatial3D.Collision;
+using MonoKits.Spatial3D.Physics.Interfaces;
 
 namespace MonoKits.Spatial3D;
 
@@ -23,7 +23,7 @@ public class SceneManager
 
     public float FieldOfView { get; set; } = MathHelper.ToRadians(45);
 
-    public bool ShowBoundingBox { get; set; } = false;
+    public bool DebugMode { get; set; } = false;
 
     public SceneManager(GraphicsDevice graphicsDevice, ICamera? camera = default)
     {
@@ -56,8 +56,7 @@ public class SceneManager
             object3D.Update(gameTime);
     }
 
-
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         var oldDepthStencilState = _graphicsDevice.DepthStencilState;
         var oldRasterizerState = _graphicsDevice.RasterizerState;
@@ -70,9 +69,9 @@ public class SceneManager
         {
             object3D.Draw(_graphicsDevice, _effect, _viewMatrix, _projectionMatrix);
 
-            if (ShowBoundingBox && object3D is ICollidable collidable)
+            if (DebugMode && object3D is IPhysicsBody)
             {
-                collidable.DrawBoundingBox(_graphicsDevice, _effect, _viewMatrix, object3D.WorldMatrix, _projectionMatrix);
+                //collidable.DrawBoundingBox(_graphicsDevice, _effect, _viewMatrix, object3D.WorldMatrix, _projectionMatrix);
                 object3D.DrawRotation(_graphicsDevice, _effect, _viewMatrix, _projectionMatrix);
             }
         }

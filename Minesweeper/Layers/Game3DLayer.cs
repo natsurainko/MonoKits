@@ -1,35 +1,36 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Minesweeper.Game3D;
-using MonoGame.Extended.ViewportAdapters;
 using MonoKits.Components;
+using MonoKits.Extensions;
 using MonoKits.Gui;
 using MonoKits.Gui.Input;
 using MonoKits.Overrides;
 using MonoKits.Spatial3D;
 using MonoKits.Spatial3D.Camera;
 using MonoKits.Spatial3D.Objects;
+using MonoKits.Spatial3D.Objects.Physics;
+using MonoKits.Spatial3D.Physics;
 using System.Collections.Generic;
 
 namespace Minesweeper.Layers;
 
 public partial class Game3DLayer : UIElement
 {
-    float _moveSpeed = 10f;
+    float _moveSpeed = 50;
     double _mouseSensitivity = 0.5f;
-    float _smoothing = 0.5f;
 
     private readonly Game _game;
     private readonly SceneManager _sceneManager;
+    private readonly PhysicsSystem _physicsSystem;
 
-    private ModelObject3D? _ground;
-    private ModelObject3D? _board;
-    private ModelObject3D? _house;
     private SpriteObject3D? _sprite;
     private SpriteObject3D? _bait;
 
-    private Player? _player;
+    private StaticModelObject3D? _ground;
+    private StaticModelObject3D? _board;
+    private StaticModelObject3D? _house;
+
+    private BodyModelObject3D? _player;
 
     private Point _screenCenter;
 
@@ -38,8 +39,9 @@ public partial class Game3DLayer : UIElement
     public Game3DLayer(Game game)
     {
         _game = game;
-        _sceneManager = new(game.GraphicsDevice, new QuaternionPerspectiveCamera(new DefaultViewportAdapter(game.GraphicsDevice)));
-        _sceneManager.ShowBoundingBox = true;
+        _sceneManager = new(game.GraphicsDevice);
+        _sceneManager.DebugMode = true;
+        _physicsSystem = new PhysicsSystem();
         _screenCenter = new Point(
             _game.GraphicsDevice.Viewport.Width / 2,
             _game.GraphicsDevice.Viewport.Height / 2
@@ -53,22 +55,26 @@ public partial class Game3DLayer : UIElement
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
 
-        _ground = ModelObject3D.LoadFromContent(_game.Content, "Models/Starvalley");
-        _board = ModelObject3D.LoadFromContent(_game.Content, "Models/Board");
-        _house = ModelObject3D.LoadFromContent(_game.Content, "Models/House");
+        _ground = StaticModelObject3D.LoadFromContent(_game.Content, "Models/Starvalley");
+        _board = StaticModelObject3D.LoadFromContent(_game.Content, "Models/Board");
+        _house = StaticModelObject3D.LoadFromContent(_game.Content, "Models/House");
+
         _sprite = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/title.png");
         _bait = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/bait.png");
-        _player = new Player(_game.Content.Load<Model>("Models/Block"));
 
-        _sprite.Position = new Vector3(10, 10, 10);
-        _sprite.Size = new Vector2(4.8f, 1.2f);
+        _player = BodyModelObject3D.LoadFromContent(_game.Content, "Models/Block");
+
+        _sprite.Position = new(10, 10, 10);
+        _sprite.Size = new(4.8f, 1.2f);
         _sprite.Billboard = SpriteObject3D.BillboardMode.CameraBillboard;
 
-        _bait.Position = new Vector3(0, 10, 0);
-        _bait.Size = new Vector2(4f, 1f);
+        _bait.Position = new(0, 10, 0);
+        _bait.Size = new(4f, 1f);
         _bait.Billboard = SpriteObject3D.BillboardMode.CylindricalBillboard;
 
-        _house.Position = new Vector3(0, 3.5f, 10);
+        _house.Position = new(0, 3.25f, 10);
+        _board.Position = new(0, 0.5f, 0);
+        _player.Position = new(0, 4, 10);
 
         _ground.EnableDefaultLighting();
         _board.EnableDefaultLighting();
@@ -82,8 +88,19 @@ public partial class Game3DLayer : UIElement
         _sceneManager.AddObject(_sprite);
         _sceneManager.AddObject(_bait);
 
-        _sceneManager.AddObject(new LineObject3D(new(0, 0, 0), new(MathHelper.PiOver2, 0, 0), 5.0f));
+        _ground.InitializeStatic(_physicsSystem, _ground.Model);
+        _board.InitializeStatic(_physicsSystem, _board.Model);
+        _house.InitializeStatic(_physicsSystem, _house.Model);
 
+        _player.InitializeBody(_physicsSystem, _player.Model);
+
+        _physicsSystem.Add(_ground);
+        _physicsSystem.Add(_board);
+        _physicsSystem.Add(_house);
+        _physicsSystem.Add(_player);
+
+        Camera.Position = new(0, 2, 25);
+        Camera.Rotation = Vector3.Zero;
         Camera.CameraMode = CameraMode.Free;
         Camera.BaseTargetDistance = 25;
         Camera.Target(_player);
@@ -157,6 +174,17 @@ public partial class Game3DLayer : UIElement
             _cameraMovementDirection.X = xFlag.X - xFlag.Y;
             _cameraMovementDirection.Y = yFlag.X - yFlag.Y;
             _cameraRoll = rollFlag.X - rollFlag.Y;
+
+            Vector2 playerYawFlag = Vector2.Zero;
+
+            if (_pressingKeys.Contains(Keys.Z))
+                playerYawFlag.X = 1;
+            if (_pressingKeys.Contains(Keys.C))
+                playerYawFlag.Y = 1;
+
+            float deltaYaw = 0.01f * (playerYawFlag.Y - playerYawFlag.X);
+
+            if (deltaYaw != 0) _player?.Rotate(new(0, (float)-deltaYaw, 0));
         }
         else
         {
@@ -165,8 +193,9 @@ public partial class Game3DLayer : UIElement
             _cameraRoll = 0;
         }
 
-            _sceneManager.Update(gameTime);
-
+        _sceneManager.Update(gameTime);
+        _physicsSystem.Update(gameTime);
+        
         if (_playerMovementDirection != Vector3.Zero && _player != null)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -190,7 +219,7 @@ public partial class Game3DLayer : UIElement
 
     protected override void DrawOverride(GameTime gameTime)
     {
-        _sceneManager?.Draw(gameTime);
+        _sceneManager?.Draw();
     }
 }
 
@@ -235,11 +264,6 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
             Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
 
         Mouse.SetPosition(_screenCenter.X, _screenCenter.Y);
-    }
-
-    void IMouseInputReceiver.OnMouseWheelMoved(in MouseEventArgs e)
-    {
-        double deltaScroll = e.ScrollWheelDelta;
     }
 
     void IFocusableElement.OnGotFocus()

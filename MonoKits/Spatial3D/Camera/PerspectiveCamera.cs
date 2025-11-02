@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoGame.Extended.ViewportAdapters;
-using MonoKits.Extensions;
 
 namespace MonoKits.Spatial3D.Camera;
 
@@ -28,10 +27,7 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, 
             _rotationAccumulator = Vector3.Zero;
         }
 
-        Vector3 rotation = _targetObject != null && CameraMode == CameraMode.FirstPerson
-            ? _targetObject.Rotation : this.Rotation;
-
-        Quaternion orientation = QuaternionExtensions.CreateFromRotationVector3(rotation);
+        Quaternion orientation = (_targetObject != null && CameraMode == CameraMode.FirstPerson ? _targetObject : this).GetOrientationForCamera();
         Vector3 forward = Vector3.Transform(Vector3.Forward, orientation);
         Vector3 up = Vector3.Transform(Vector3.Up, orientation);
 
@@ -92,11 +88,6 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, 
     /// </summary>
     /// <param name="angles"></param>
     public override void Rotate(Vector3 angles) => _rotationAccumulator += new Vector3(angles.X, angles.Y, angles.Z);
-
-    public void Zoom(float value)
-    {
-
-    }
 
     public void Target(GameObject3D? target) => _targetObject = target;
 }

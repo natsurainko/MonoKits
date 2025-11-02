@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoKits.Extensions;
 
 namespace MonoKits.Spatial3D;
 
@@ -93,6 +94,8 @@ public abstract partial class GameObject3D
 
         Rotation = new(pitch, yaw, roll);
     }
+
+    public virtual Quaternion GetOrientationForCamera() => QuaternionExtensions.CreateFromRotationVector3(Rotation);
 }
 
 public partial class GameObject3D
