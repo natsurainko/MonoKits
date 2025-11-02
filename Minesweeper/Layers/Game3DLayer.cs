@@ -124,97 +124,78 @@ public partial class Game3DLayer : UIElement
 
     public override void Update(GameTime gameTime)
     {
-        if (_pressingKeys.Count != 0)
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (deltaTime <= 0) return;
+
+        Vector3 playerMovementDirection = Vector3.Zero;
+        Vector3 cameraMovementDirection = Vector3.Zero;
+
+        float cameraRoll = 0;
+        float playerYaw = 0;
+
+        foreach (var item in _pressingKeys)
         {
-            Vector2 xFlag = Vector2.Zero;
-            Vector2 yFlag = Vector2.Zero;
-            Vector2 zFlag = Vector2.Zero;
-            Vector2 rollFlag = Vector2.Zero;
-
-            if (_pressingKeys.Contains(Keys.A))
-                zFlag.Y = 1;
-            if (_pressingKeys.Contains(Keys.D))
-                zFlag.X = 1;
-            if (_pressingKeys.Contains(Keys.S))
-                xFlag.Y = 1;
-            if (_pressingKeys.Contains(Keys.W))
-                xFlag.X = 1;
-            if (_pressingKeys.Contains(Keys.Space))
-                yFlag.X = 1;
-            if (_pressingKeys.Contains(Keys.LeftShift))
-                yFlag.Y = 1;
-
-            _playerMovementDirection.Z = zFlag.X - zFlag.Y;
-            _playerMovementDirection.X = xFlag.X - xFlag.Y;
-            _playerMovementDirection.Y = yFlag.X - yFlag.Y;
-
-            xFlag = Vector2.Zero;
-            yFlag = Vector2.Zero;
-            zFlag = Vector2.Zero;
-
-            if (_pressingKeys.Contains(Keys.Left))
-                zFlag.Y = 1;
-            if (_pressingKeys.Contains(Keys.Right))
-                zFlag.X = 1;
-            if (_pressingKeys.Contains(Keys.Up))
-                xFlag.X = 1;
-            if (_pressingKeys.Contains(Keys.Down))
-                xFlag.Y = 1;
-            if (_pressingKeys.Contains(Keys.Add))
-                yFlag.X = 1;
-            if (_pressingKeys.Contains(Keys.Subtract))
-                yFlag.Y = 1;
-
-            if (_pressingKeys.Contains(Keys.NumPad4))
-                rollFlag.Y = 1;
-            if (_pressingKeys.Contains(Keys.NumPad6))
-                rollFlag.X = 1;
-
-            _cameraMovementDirection.Z = zFlag.X - zFlag.Y;
-            _cameraMovementDirection.X = xFlag.X - xFlag.Y;
-            _cameraMovementDirection.Y = yFlag.X - yFlag.Y;
-            _cameraRoll = rollFlag.X - rollFlag.Y;
-
-            Vector2 playerYawFlag = Vector2.Zero;
-
-            if (_pressingKeys.Contains(Keys.Z))
-                playerYawFlag.X = 1;
-            if (_pressingKeys.Contains(Keys.C))
-                playerYawFlag.Y = 1;
-
-            float deltaYaw = 0.01f * (playerYawFlag.Y - playerYawFlag.X);
-
-            if (deltaYaw != 0) _player?.Rotate(new(0, (float)-deltaYaw, 0));
-        }
-        else
-        {
-            _playerMovementDirection = Vector3.Zero;
-            _cameraMovementDirection = Vector3.Zero;
-            _cameraRoll = 0;
+            playerMovementDirection.X += item switch
+            {
+                Keys.W => 1,
+                Keys.S => -1,
+                _ => 0
+            };
+            playerMovementDirection.Y += item switch
+            {
+                Keys.Space => 1,
+                Keys.S => -1,
+                _ => 0
+            };
+            playerMovementDirection.Z += item switch
+            {
+                Keys.A => -1,
+                Keys.D => 1,
+                _ => 0
+            };
+            cameraMovementDirection.X += item switch
+            {
+                Keys.Up => 1,
+                Keys.Down => -1,
+                _ => 0
+            };
+            cameraMovementDirection.Y += item switch
+            {
+                Keys.Add => 1,
+                Keys.Subtract => -1,
+                _ => 0
+            };
+            cameraMovementDirection.Z += item switch
+            {
+                Keys.Left => -1,
+                Keys.Right => 1,
+                _ => 0
+            };
+            playerYaw += item switch
+            {
+                Keys.Z => 1,
+                Keys.C => -1,
+                _ => 0
+            };
+            cameraRoll += item switch
+            {
+                Keys.NumPad4 => -1,
+                Keys.NumPad6 => 1,
+                _ => 0
+            };
         }
 
         _sceneManager.Update(gameTime);
         _physicsSystem.Update(gameTime);
-        
-        if (_playerMovementDirection != Vector3.Zero && _player != null)
-        {
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Vector3 scaledMovement = _playerMovementDirection * _moveSpeed * deltaTime;
-            _player.Move(scaledMovement);
-        }
 
-        if (_cameraMovementDirection != Vector3.Zero)
-        {
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Vector3 scaledMovement = _cameraMovementDirection * _moveSpeed * deltaTime;
-            Camera.Move(scaledMovement);
-        }
-
-        if (_cameraRoll != 0.0f)
-        {
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Camera?.Rotate(new(0, 0, (float)_mouseSensitivity * _cameraRoll * _moveSpeed * deltaTime));
-        }
+        if (playerMovementDirection != Vector3.Zero)
+            _player?.Move(playerMovementDirection * _moveSpeed * deltaTime);
+        if (cameraMovementDirection != Vector3.Zero)
+            Camera.Move(cameraMovementDirection * _moveSpeed * deltaTime);
+        if (cameraRoll != 0.0f)
+            Camera?.Rotate(new(0, 0, (float)_mouseSensitivity * cameraRoll * _moveSpeed * deltaTime));
+        if (playerYaw != 0.0f)
+            _player?.Rotate(new(0, (float)-playerYaw * 0.01f, 0));
     }
 
     protected override void DrawOverride(GameTime gameTime)
@@ -227,15 +208,12 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 {
     private readonly List<Keys> _pressingKeys = [];
 
-    private Vector3 _playerMovementDirection = Vector3.Zero;
-    private Vector3 _cameraMovementDirection = Vector3.Zero;
-    float _cameraRoll = 0;
-
     public bool Focusable => true;
 
     void IKeyboardInputReceiver.OnKeyPressed(in KeyboardEventArgs e)
     {
-        if (!_pressingKeys.Contains(e.Key)) _pressingKeys.Add(e.Key);
+        if (!_pressingKeys.Contains(e.Key)) 
+            _pressingKeys.Add(e.Key);
 
         if (e.Key == Keys.F5)
             Camera.CameraMode = (CameraMode)(((int)Camera.CameraMode + 1) % 3);
@@ -252,7 +230,6 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 
         double deltaX = (e.CurrentState.X - _screenCenter.X) * _mouseSensitivity / _screenCenter.X;
         double deltaY = (e.CurrentState.Y - _screenCenter.Y) * _mouseSensitivity / _screenCenter.Y;
-        
 
         if (deltaX == 0 && deltaY == 0) return;
 
