@@ -71,6 +71,13 @@ internal partial class UILayer : ContentControl
             Text = "Camera Rotation: -",
             TextWrapping = TextWrapping.NoWrap,
         };
+        TextBlock cameraTargetPositionTextBlock = new()
+        {
+            FontFamily = new DynamicFontFamily(Contents.Unifont),
+            Foreground = Color.White,
+            Text = "Camera Target Position: -",
+            TextWrapping = TextWrapping.NoWrap,
+        };
 
         _pressingKeysTextBlock = new()
         {
@@ -105,7 +112,8 @@ internal partial class UILayer : ContentControl
                 _pressingKeysTextBlock,
                 cameraModeTextBlock,
                 cameraPositionTextBlock,
-                cameraRotationTextBlock
+                cameraRotationTextBlock,
+                cameraTargetPositionTextBlock
             }
         };
 
@@ -133,6 +141,7 @@ internal partial class UILayer : ContentControl
                 cameraModeTextBlock.Text = $"Camera Mode: {_game3DLayer.Camera.CameraMode}";
                 cameraPositionTextBlock.Text = $"Camera Position: {position}";
                 cameraRotationTextBlock.Text = $"Camera Rotation: Yaw: {rotation.Y:F2}, Pitch: {rotation.X:F2}, Roll: {rotation.Z:F2}";
+                cameraTargetPositionTextBlock.Text = $"Camera Target Position: {(_game3DLayer.Camera.Target == null ? "-" : _game3DLayer.Camera.Target.Position)}";
             }
         };
     } 

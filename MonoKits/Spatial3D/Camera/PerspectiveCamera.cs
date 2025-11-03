@@ -18,6 +18,7 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, 
 
     public CameraMode CameraMode { get; set; } = CameraMode.Free;
     public float BaseTargetDistance { get; set; } = 0.0f;
+    public GameObject3D? Target => _targetObject;
 
     public void GetViewMatrix(out Matrix matrix)
     {
@@ -89,5 +90,5 @@ public class PerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, 
     /// <param name="angles"></param>
     public override void Rotate(Vector3 angles) => _rotationAccumulator += new Vector3(angles.X, angles.Y, angles.Z);
 
-    public void Target(GameObject3D? target) => _targetObject = target;
+    public void SetTarget(GameObject3D? target) => _targetObject = target;
 }

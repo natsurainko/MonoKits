@@ -28,7 +28,7 @@ public class SceneManager
     public SceneManager(GraphicsDevice graphicsDevice, ICamera? camera = default)
     {
         _graphicsDevice = graphicsDevice;
-        _camera = camera ?? new PerspectiveCamera(new DefaultViewportAdapter(graphicsDevice));
+        _camera = camera ?? new QuaternionPerspectiveCamera(new DefaultViewportAdapter(graphicsDevice));
 
         _depthStencilState = new DepthStencilState
         {

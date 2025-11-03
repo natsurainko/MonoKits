@@ -88,4 +88,9 @@ public static class Vector3Extensions
         dot = Math.Clamp(dot, -1f, 1f);
         return MathF.Acos(dot);
     }
+
+    public static System.Numerics.Vector3 ToNumerics(Vector3 v)
+    {
+        return new System.Numerics.Vector3(v.X, v.Y, v.Z);
+    }
 }

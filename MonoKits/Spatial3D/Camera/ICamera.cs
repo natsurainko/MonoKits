@@ -15,11 +15,13 @@ public interface ICamera
     float NearPlane { get; }
     float FarPlane { get; }
 
+    GameObject3D? Target { get; }
+
     void GetViewMatrix(out Matrix matrix);
     void GetProjectionMatrix(out Matrix matrix);
 
     void Move(Vector3 offset);
     void Rotate(Vector3 angles);
 
-    void Target(GameObject3D? target);
+    void SetTarget(GameObject3D? target);
 }

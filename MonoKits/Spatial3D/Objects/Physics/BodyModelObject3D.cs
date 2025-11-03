@@ -1,6 +1,7 @@
 ﻿using BepuPhysics;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MonoKits.Extensions;
 using MonoKits.Spatial3D.Physics.Interfaces;
 using System.Numerics;
 
@@ -57,8 +58,14 @@ public partial class BodyModelObject3D
 
         _bodyReference.Awake = true;
 
+        //线加速度增量运动
+<<<<<<< Updated upstream
         Vector3 forward = Vector3.Normalize(Vector3.Transform(new Vector3(0, 0, -1), Orientation));
         Vector3 right = Vector3.Normalize(Vector3.Transform(new Vector3(1, 0, 0), Orientation));
+=======
+        Vector3 forward = Vector3.Transform(new Vector3(0, 0, -1), Orientation);
+        Vector3 right = Vector3.Transform(new Vector3(1, 0, 0), Orientation);
+>>>>>>> Stashed changes
         Vector3 impulse = Vector3.Zero;
 
         impulse += forward * offset.X;
@@ -72,11 +79,20 @@ public partial class BodyModelObject3D
     {
         if (!_loaded) return;
 
-        Quaternion deltaRotation = Quaternion.CreateFromYawPitchRoll(angles.Y, angles.X, angles.Z);
-        Orientation = Quaternion.Normalize(deltaRotation * Orientation);
-
         _bodyReference.Awake = true;
-        _bodyReference.Pose.Orientation = Orientation;
+
+        //角速度增量运动
+        //Quaternion deltaRotation = Quaternion.CreateFromYawPitchRoll(angles.Y, angles.X, angles.Z);
+        //Orientation = Quaternion.Normalize(deltaRotation * Orientation);
+        //_bodyReference.Pose.Orientation = Orientation;
+
+        //角加速度增量运动
+        Vector3 anglesTrans = Vector3.Transform(Vector3Extensions.ToNumerics(angles), Orientation);
+<<<<<<< Updated upstream
+        _bodyReference.ApplyAngularImpulse(anglesTrans);
+=======
+        _bodyReference.ApplyAngularImpulse(anglesTrans * Mass);
+>>>>>>> Stashed changes
     }
 
     protected override void UpdateWorldMatrix()

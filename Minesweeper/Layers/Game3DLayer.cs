@@ -31,6 +31,7 @@ public partial class Game3DLayer : UIElement
     private StaticModelObject3D? _house;
 
     private BodyModelObject3D? _player;
+    private BodyModelObject3D? _plane;
 
     private Point _screenCenter;
 
@@ -55,7 +56,7 @@ public partial class Game3DLayer : UIElement
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
 
-        _ground = StaticModelObject3D.LoadFromContent(_game.Content, "Models/Starvalley");
+        _ground = StaticModelObject3D.LoadFromContent(_game.Content, "Models/GroundTest");
         _board = StaticModelObject3D.LoadFromContent(_game.Content, "Models/Board");
         _house = StaticModelObject3D.LoadFromContent(_game.Content, "Models/House");
 
@@ -63,6 +64,7 @@ public partial class Game3DLayer : UIElement
         _bait = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/bait.png");
 
         _player = BodyModelObject3D.LoadFromContent(_game.Content, "Models/Block");
+        _plane = BodyModelObject3D.LoadFromContent(_game.Content, "Models/QuickPlane");
 
         _sprite.Position = new(10, 10, 10);
         _sprite.Size = new(4.8f, 1.2f);
@@ -74,17 +76,20 @@ public partial class Game3DLayer : UIElement
 
         _house.Position = new(0, 3.25f, 10);
         _board.Position = new(0, 0.5f, 0);
-        _player.Position = new(0, 4, 10);
+        _player.Position = new(0, 4, 0);
+        _plane.Position = new(15f, 15f, 15f);
 
         _ground.EnableDefaultLighting();
         _board.EnableDefaultLighting();
         _house.EnableDefaultLighting();
         _player.EnableDefaultLighting();
+        _plane.EnableDefaultLighting();
 
         _sceneManager.AddObject(_ground);
         _sceneManager.AddObject(_board);
         _sceneManager.AddObject(_house);
         _sceneManager.AddObject(_player);
+        _sceneManager.AddObject(_plane);
         _sceneManager.AddObject(_sprite);
         _sceneManager.AddObject(_bait);
 
@@ -93,17 +98,19 @@ public partial class Game3DLayer : UIElement
         _house.InitializeStatic(_physicsSystem, _house.Model);
 
         _player.InitializeBody(_physicsSystem, _player.Model);
+        _plane.InitializeBody(_physicsSystem, _plane.Model);
 
         _physicsSystem.Add(_ground);
         _physicsSystem.Add(_board);
         _physicsSystem.Add(_house);
         _physicsSystem.Add(_player);
+        _physicsSystem.Add(_plane);
 
         Camera.Position = new(0, 2, 25);
         Camera.Rotation = Vector3.Zero;
         Camera.CameraMode = CameraMode.Free;
         Camera.BaseTargetDistance = 25;
-        Camera.Target(_player);
+        Camera.SetTarget(_player);
     }
 
     protected override void OnUnloaded()
@@ -128,74 +135,143 @@ public partial class Game3DLayer : UIElement
         if (deltaTime <= 0) return;
 
         Vector3 playerMovementDirection = Vector3.Zero;
-        Vector3 cameraMovementDirection = Vector3.Zero;
+        Vector3 cameraMovementDirection = Vector3.Zero; 
+        Vector3 planeMovementDirection = Vector3.Zero;
+
+        Vector3 planeRotationDirection = Vector3.Zero;
 
         float cameraRoll = 0;
         float playerYaw = 0;
 
         foreach (var item in _pressingKeys)
         {
-            playerMovementDirection.X += item switch
+            if (Camera.Target != null && Camera.Target == _player) 
             {
-                Keys.W => 1,
-                Keys.S => -1,
-                _ => 0
-            };
-            playerMovementDirection.Y += item switch
+                playerMovementDirection.X += item switch
+                {
+                    Keys.W => 1,
+                    Keys.S => -1,
+                    _ => 0
+                };
+                playerMovementDirection.Y += item switch
+                {
+                    Keys.Space => 1,
+                    Keys.LeftShift => -1,
+                    _ => 0
+                };
+                playerMovementDirection.Z += item switch
+                {
+                    Keys.A => -1,
+                    Keys.D => 1,
+                    _ => 0
+                };
+                playerYaw += item switch
+                {
+                    Keys.Z => 1,
+                    Keys.C => -1,
+                    _ => 0
+                };
+            }
+
+            if (Camera.Target != null && Camera.Target == _plane)
             {
-                Keys.Space => 1,
-                Keys.LeftShift => -1,
-                _ => 0
-            };
-            playerMovementDirection.Z += item switch
+                planeMovementDirection.X += item switch
+                {
+                    Keys.W => 1,
+                    Keys.S => -0.5f,
+                    _ => 0
+                };
+                planeMovementDirection.Y += item switch
+                {
+                    Keys.Space => 1,
+                    Keys.LeftShift => -1,
+                    _ => 0
+                };
+                planeRotationDirection.Y += item switch
+                {
+                    Keys.A => 1,
+                    Keys.D => -1,
+                    _ => 0
+                };
+
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
+                if (Camera.CameraMode == CameraMode.ThirdPerson)
+                {
+                    planeRotationDirection.X += item switch
+                    {
+                        Keys.Up => 1,
+                        Keys.Down => -1,
+                        _ => 0
+                    };
+                    planeRotationDirection.Z += item switch
+                    {
+                        Keys.Left => 1,
+                        Keys.Right => -1,
+                        _ => 0
+                    };
+                }
+            }
+<<<<<<< Updated upstream
+            ;
+=======
+>>>>>>> Stashed changes
+
+            if (Camera.CameraMode == CameraMode.Free)
             {
-                Keys.A => -1,
-                Keys.D => 1,
-                _ => 0
-            };
-            cameraMovementDirection.X += item switch
-            {
-                Keys.Up => 1,
-                Keys.Down => -1,
-                _ => 0
-            };
-            cameraMovementDirection.Y += item switch
-            {
-                Keys.Add => 1,
-                Keys.Subtract => -1,
-                _ => 0
-            };
-            cameraMovementDirection.Z += item switch
-            {
-                Keys.Left => -1,
-                Keys.Right => 1,
-                _ => 0
-            };
-            playerYaw += item switch
-            {
-                Keys.Z => 1,
-                Keys.C => -1,
-                _ => 0
-            };
-            cameraRoll += item switch
-            {
-                Keys.NumPad4 => -1,
-                Keys.NumPad6 => 1,
-                _ => 0
-            };
+                cameraMovementDirection.X += item switch
+                {
+                    Keys.Up => 1,
+                    Keys.Down => -1,
+                    _ => 0
+                };
+                cameraMovementDirection.Y += item switch
+                {
+                    Keys.Add => 1,
+                    Keys.Subtract => -1,
+                    _ => 0
+                };
+                cameraMovementDirection.Z += item switch
+                {
+                    Keys.Left => -1,
+                    Keys.Right => 1,
+                    _ => 0
+                };
+                cameraRoll += item switch
+                {
+                    Keys.NumPad4 => -1,
+                    Keys.NumPad6 => 1,
+                    _ => 0
+                };
+            }
+
         }
 
         _sceneManager.Update(gameTime);
         _physicsSystem.Update(gameTime);
 
         if (playerMovementDirection != Vector3.Zero)
+<<<<<<< Updated upstream
             _player?.Move(playerMovementDirection * _moveSpeed);
+        if (playerYaw != 0.0f)
+            _player?.Rotate(new(0, -playerYaw * _moveSpeed * deltaTime, 0));
+        if (planeMovementDirection != Vector3.Zero)
+            _plane?.Move(planeMovementDirection * _moveSpeed);
+=======
+            _player?.Move(playerMovementDirection * _moveSpeed * deltaTime);
+        if (playerYaw != 0.0f)
+            _player?.Rotate(new(0, -playerYaw * _moveSpeed * deltaTime, 0));
+        if (planeMovementDirection != Vector3.Zero)
+            _plane?.Move(planeMovementDirection * _moveSpeed * deltaTime);
+>>>>>>> Stashed changes
+        if (planeRotationDirection != Vector3.Zero)
+            _plane?.Rotate(planeRotationDirection * _moveSpeed * deltaTime);
         if (cameraMovementDirection != Vector3.Zero)
             Camera.Move(cameraMovementDirection * _moveSpeed * deltaTime);
         if (cameraRoll != 0.0f)
-            Camera?.Rotate(new(0, 0, (float)_mouseSensitivity * cameraRoll * _moveSpeed * deltaTime));
-        if (playerYaw != 0.0f)
-            _player?.Rotate(new(0, (float)-playerYaw * 0.01f, 0));
+            Camera?.Rotate(new(0, 0, cameraRoll * _moveSpeed * deltaTime * 0.1f));
     }
 
     protected override void DrawOverride(GameTime gameTime)
@@ -217,6 +293,12 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 
         if (e.Key == Keys.F5)
             Camera.CameraMode = (CameraMode)(((int)Camera.CameraMode + 1) % 3);
+
+        if (e.Key == Keys.F6)
+        {
+            if (Camera.Target == null ||Camera.Target != _player) Camera.SetTarget(_player);
+            else if (Camera.Target == null || Camera.Target != _plane) Camera.SetTarget(_plane);
+        }
     }
 
     void IKeyboardInputReceiver.OnKeyReleased(in KeyboardEventArgs e)
@@ -236,7 +318,17 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
         if (Camera.CameraMode == CameraMode.ThirdPerson)
             Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
         else if (Camera.CameraMode == CameraMode.FirstPerson)
-            _player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
+        {
+            if (Camera.Target != null && Camera.Target == _player)
+            {
+                _player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
+            }
+
+            if (Camera.Target != null && Camera.Target == _plane)
+            {
+                _plane?.Rotate(new((float)-deltaY * 10f, 0, (float)-deltaX * 10f));
+            }
+        }
         else
             Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
 

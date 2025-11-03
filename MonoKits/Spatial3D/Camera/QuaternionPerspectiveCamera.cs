@@ -7,7 +7,6 @@ namespace MonoKits.Spatial3D.Camera;
 public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : GameObject3D, ICamera
 {
     private readonly ViewportAdapter _viewportAdapter = viewportAdapter;
-    private GameObject3D? _targetObject;
 
     private Vector3 _positionNow = Vector3.Zero;
 
@@ -20,6 +19,7 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
     private Vector3 _rotationAccumulator = Vector3.Zero;
 
     private CameraMode oldCameraMode = CameraMode.Free;
+    public GameObject3D? Target { get; set; } = null;
 
     public float FieldOfView { get; set; } = MathHelper.ToRadians(45);
     public float AspectRatio => _viewportAdapter.Viewport.AspectRatio;
@@ -35,13 +35,12 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
     private Vector3 RightNow => Vector3.Transform(Vector3.Right, _quaternionNow);
     private Vector3 UpNow => Vector3.Transform(Vector3.Up, _quaternionNow);
 
-
     /// <param name="offset">ypr = (forward, up, right)</param>
     public override void Move(Vector3 offset)
     {
         if (CameraMode != CameraMode.Free)
         {
-            _targetObject?.Move(offset);
+            Target?.Move(offset);
             return;
         }
         _movementAccumulator += offset;
@@ -66,7 +65,7 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
         RotateByEuler(pitch, yaw, roll);
     }
 
-    public void Target(GameObject3D? target) => _targetObject = target;
+    public void SetTarget(GameObject3D? target) => Target = target;
 
     public void GetProjectionMatrix(out Matrix matrix) => matrix = Matrix.CreatePerspectiveFieldOfView(FieldOfView, AspectRatio, NearPlane, FarPlane);
     public void GetViewMatrix(out Matrix matrix) 
@@ -87,10 +86,11 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
     private void UpdateRotation()
     {
         //更新最终朝向
-        if (CameraMode == CameraMode.FirstPerson && _targetObject != null)
+        if (CameraMode == CameraMode.FirstPerson && Target != null)
         {
-            Rotation = _targetObject.Rotation;
-            RotateToEluer(Rotation.X, Rotation.Y, Rotation.Z);
+            //Rotation = _targetObject.Rotation;
+            //RotateToEluer(Rotation.X, Rotation.Y, Rotation.Z);
+            _quaternionTarget = Target.GetOrientationForCamera();
         }
         else if (_rotationAccumulator != Vector3.Zero)
         {
@@ -114,13 +114,13 @@ public class QuaternionPerspectiveCamera(ViewportAdapter viewportAdapter) : Game
     private void UpdatePosition()
     {
         //更新最终位置
-        if (CameraMode == CameraMode.FirstPerson && _targetObject != null)
+        if (CameraMode == CameraMode.FirstPerson && Target != null)
         {
-            Position = _targetObject.Position;
+            Position = Target.Position;
         }
-        else if (CameraMode == CameraMode.ThirdPerson && _targetObject != null)
+        else if (CameraMode == CameraMode.ThirdPerson && Target != null)
         {
-            Position = _targetObject.Position - ForwardNow * BaseTargetDistance;
+            Position = Target.Position - ForwardNow * BaseTargetDistance;
         }
         else
         {
