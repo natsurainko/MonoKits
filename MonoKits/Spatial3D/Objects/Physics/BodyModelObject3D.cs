@@ -13,7 +13,7 @@ public partial class BodyModelObject3D(Model model) : ModelObject3D(model), IPhy
 
     public bool IsKinematic => false;
 
-    public float Mass { get; set; } = 10f;
+    public float Mass { get; set; } = 20f;
 
     public BodyDescription BodyDescription { get; set; }
 
@@ -57,15 +57,15 @@ public partial class BodyModelObject3D
 
         _bodyReference.Awake = true;
 
-        Vector3 forward = Vector3.Transform(new Vector3(0, 0, -1), Orientation);
-        Vector3 right = Vector3.Transform(new Vector3(1, 0, 0), Orientation);
+        Vector3 forward = Vector3.Normalize(Vector3.Transform(new Vector3(0, 0, -1), Orientation));
+        Vector3 right = Vector3.Normalize(Vector3.Transform(new Vector3(1, 0, 0), Orientation));
         Vector3 impulse = Vector3.Zero;
 
         impulse += forward * offset.X;
         impulse += new Vector3(0, 1, 0) * offset.Y;
         impulse += right * offset.Z;
 
-        _bodyReference.ApplyLinearImpulse(impulse * Mass);
+        _bodyReference.ApplyLinearImpulse(impulse);
     }
 
     public override void Rotate(Microsoft.Xna.Framework.Vector3 angles)

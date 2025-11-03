@@ -16,7 +16,7 @@ namespace Minesweeper.Layers;
 
 public partial class Game3DLayer : UIElement
 {
-    float _moveSpeed = 50;
+    float _moveSpeed = 10;
     double _mouseSensitivity = 0.5f;
 
     private readonly Game _game;
@@ -144,7 +144,7 @@ public partial class Game3DLayer : UIElement
             playerMovementDirection.Y += item switch
             {
                 Keys.Space => 1,
-                Keys.S => -1,
+                Keys.LeftShift => -1,
                 _ => 0
             };
             playerMovementDirection.Z += item switch
@@ -189,7 +189,7 @@ public partial class Game3DLayer : UIElement
         _physicsSystem.Update(gameTime);
 
         if (playerMovementDirection != Vector3.Zero)
-            _player?.Move(playerMovementDirection * _moveSpeed * deltaTime);
+            _player?.Move(playerMovementDirection * _moveSpeed);
         if (cameraMovementDirection != Vector3.Zero)
             Camera.Move(cameraMovementDirection * _moveSpeed * deltaTime);
         if (cameraRoll != 0.0f)

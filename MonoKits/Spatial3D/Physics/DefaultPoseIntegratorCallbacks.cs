@@ -2,7 +2,6 @@
 using BepuPhysics.Collidables;
 using BepuUtilities;
 using MonoKits.Spatial3D.Physics.Interfaces;
-using System.Buffers;
 using System.Numerics;
 
 namespace MonoKits.Spatial3D.Physics;
@@ -31,7 +30,8 @@ public struct DefaultPoseIntegratorCallbacks(PhysicsObjectMapper physicsObjectMa
         Vector<float> dt,
         ref BodyVelocityWide velocity)
     {
-        int[] gravityMask = ArrayPool<int>.Shared.Rent(Vector<int>.Count);
+        Span<int> gravityMask = stackalloc int[Vector<int>.Count];
+        gravityMask.Clear();
 
         for (int i = 0; i < Vector<int>.Count; i++)
         {
@@ -39,15 +39,12 @@ public struct DefaultPoseIntegratorCallbacks(PhysicsObjectMapper physicsObjectMa
             if (!physicsObjectMapper.TryGetBodyObject(new CollidableReference(CollidableMobility.Dynamic, new(bodyIndices[i])), out var physicsBody)) continue;
             if (physicsBody is not IAccelerationAware accelerationAware) continue;
 
-            if (accelerationAware.AffectedByGravity) 
-                gravityMask[i] = 1;
+            if (accelerationAware.AffectedByGravity) gravityMask[i] = 1;
         }
 
         var gravityY = new Vector<float>(Gravity);
         var shouldIntegrateGravity = Vector.GreaterThan(new(gravityMask), Vector<int>.Zero);
         velocity.Linear.Y = Vector.ConditionalSelect(shouldIntegrateGravity, velocity.Linear.Y + gravityY * dt, velocity.Linear.Y);
-
-        ArrayPool<int>.Shared.Return(gravityMask);
     }
 
     public void PrepareForIntegration(float dt) { }
