@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MonoKits.SourceGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\Minesweeper\\Minesweeper.csproj"
+    }
+  }
+}

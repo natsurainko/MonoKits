@@ -1,13 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Minesweeper.Scenes;
+using Minesweeper.Scenes.Contents;
 using MonoKits.Components;
-using MonoKits.Extensions;
 using MonoKits.Gui;
 using MonoKits.Gui.Input;
 using MonoKits.Overrides;
 using MonoKits.Spatial3D;
 using MonoKits.Spatial3D.Camera;
-using MonoKits.Spatial3D.Objects;
 using MonoKits.Spatial3D.Objects.Physics;
 using MonoKits.Spatial3D.Physics;
 using System.Collections.Generic;
@@ -16,22 +16,15 @@ namespace Minesweeper.Layers;
 
 public partial class Game3DLayer : UIElement
 {
-    float _moveSpeed = 10;
-    double _mouseSensitivity = 0.5f;
+    readonly float _moveSpeed = 10;
+    readonly double _mouseSensitivity = 0.5f;
 
     private readonly Game _game;
     private readonly SceneManager _sceneManager;
     private readonly PhysicsSystem _physicsSystem;
 
-    private SpriteObject3D? _sprite;
-    private SpriteObject3D? _bait;
-
-    private StaticModelObject3D? _ground;
-    private StaticModelObject3D? _board;
-    private StaticModelObject3D? _house;
-
-    private BodyModelObject3D? _player;
-    private BodyModelObject3D? _plane;
+    private BodyModelObject3D? Player;
+    private BodyModelObject3D? Plane;
 
     private Point _screenCenter;
 
@@ -56,61 +49,18 @@ public partial class Game3DLayer : UIElement
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
 
-        _ground = StaticModelObject3D.LoadFromContent(_game.Content, "Models/GroundTest");
-        _board = StaticModelObject3D.LoadFromContent(_game.Content, "Models/Board");
-        _house = StaticModelObject3D.LoadFromContent(_game.Content, "Models/House");
+        MainSceneContent mainSceneContent = new(_game.Content);
+        MainScene mainScene = new(mainSceneContent, _game.Content, _physicsSystem);
+        mainScene.Load(_sceneManager);
 
-        _sprite = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/title.png");
-        _bait = SpriteObject3D.LoadFromContent(_game.GraphicsDevice, "Content/Images/bait.png");
-
-        _player = BodyModelObject3D.LoadFromContent(_game.Content, "Models/Block");
-        _plane = BodyModelObject3D.LoadFromContent(_game.Content, "Models/QuickPlane");
-
-        _sprite.Position = new(10, 10, 10);
-        _sprite.Size = new(4.8f, 1.2f);
-        _sprite.Billboard = SpriteObject3D.BillboardMode.CameraBillboard;
-
-        _bait.Position = new(0, 10, 0);
-        _bait.Size = new(4f, 1f);
-        _bait.Billboard = SpriteObject3D.BillboardMode.CylindricalBillboard;
-
-        _house.Position = new(0, 3.25f, 10);
-        _board.Position = new(0, 0.5f, 0);
-        _player.Position = new(0, 4, 0);
-        _plane.Position = new(15f, 15f, 15f);
-
-        _ground.EnableDefaultLighting();
-        _board.EnableDefaultLighting();
-        _house.EnableDefaultLighting();
-        _player.EnableDefaultLighting();
-        _plane.EnableDefaultLighting();
-
-        _sceneManager.AddObject(_ground);
-        _sceneManager.AddObject(_board);
-        _sceneManager.AddObject(_house);
-        _sceneManager.AddObject(_player);
-        _sceneManager.AddObject(_plane);
-        _sceneManager.AddObject(_sprite);
-        _sceneManager.AddObject(_bait);
-
-        _ground.InitializeStatic(_physicsSystem, _ground.Model);
-        _board.InitializeStatic(_physicsSystem, _board.Model);
-        _house.InitializeStatic(_physicsSystem, _house.Model);
-
-        _player.InitializeBody(_physicsSystem, _player.Model);
-        _plane.InitializeBody(_physicsSystem, _plane.Model);
-
-        _physicsSystem.Add(_ground);
-        _physicsSystem.Add(_board);
-        _physicsSystem.Add(_house);
-        _physicsSystem.Add(_player);
-        _physicsSystem.Add(_plane);
+        Player = mainScene.Player;
+        Plane = mainScene.Plane;
 
         Camera.Position = new(0, 2, 25);
         Camera.Rotation = Vector3.Zero;
         Camera.CameraMode = CameraMode.Free;
         Camera.BaseTargetDistance = 25;
-        Camera.SetTarget(_player);
+        Camera.SetTarget(Player);
     }
 
     protected override void OnUnloaded()
@@ -145,7 +95,7 @@ public partial class Game3DLayer : UIElement
 
         foreach (var item in _pressingKeys)
         {
-            if (Camera.Target != null && Camera.Target == _player) 
+            if (Camera.Target != null && Camera.Target == Player) 
             {
                 playerMovementDirection.X += item switch
                 {
@@ -173,7 +123,7 @@ public partial class Game3DLayer : UIElement
                 };
             }
 
-            if (Camera.Target != null && Camera.Target == _plane)
+            if (Camera.Target != null && Camera.Target == Plane)
             {
                 planeMovementDirection.X += item switch
                 {
@@ -194,10 +144,6 @@ public partial class Game3DLayer : UIElement
                     _ => 0
                 };
 
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
                 if (Camera.CameraMode == CameraMode.ThirdPerson)
                 {
                     planeRotationDirection.X += item switch
@@ -214,10 +160,6 @@ public partial class Game3DLayer : UIElement
                     };
                 }
             }
-<<<<<<< Updated upstream
-            ;
-=======
->>>>>>> Stashed changes
 
             if (Camera.CameraMode == CameraMode.Free)
             {
@@ -246,28 +188,19 @@ public partial class Game3DLayer : UIElement
                     _ => 0
                 };
             }
-
         }
 
         _sceneManager.Update(gameTime);
         _physicsSystem.Update(gameTime);
 
         if (playerMovementDirection != Vector3.Zero)
-<<<<<<< Updated upstream
-            _player?.Move(playerMovementDirection * _moveSpeed);
+            Player?.Move(playerMovementDirection * _moveSpeed);
         if (playerYaw != 0.0f)
-            _player?.Rotate(new(0, -playerYaw * _moveSpeed * deltaTime, 0));
+            Player?.Rotate(new(0, -playerYaw * _moveSpeed * deltaTime, 0));
         if (planeMovementDirection != Vector3.Zero)
-            _plane?.Move(planeMovementDirection * _moveSpeed);
-=======
-            _player?.Move(playerMovementDirection * _moveSpeed * deltaTime);
-        if (playerYaw != 0.0f)
-            _player?.Rotate(new(0, -playerYaw * _moveSpeed * deltaTime, 0));
-        if (planeMovementDirection != Vector3.Zero)
-            _plane?.Move(planeMovementDirection * _moveSpeed * deltaTime);
->>>>>>> Stashed changes
+            Plane?.Move(planeMovementDirection * _moveSpeed);
         if (planeRotationDirection != Vector3.Zero)
-            _plane?.Rotate(planeRotationDirection * _moveSpeed * deltaTime);
+            Plane?.Rotate(planeRotationDirection * _moveSpeed * deltaTime);
         if (cameraMovementDirection != Vector3.Zero)
             Camera.Move(cameraMovementDirection * _moveSpeed * deltaTime);
         if (cameraRoll != 0.0f)
@@ -296,8 +229,8 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
 
         if (e.Key == Keys.F6)
         {
-            if (Camera.Target == null ||Camera.Target != _player) Camera.SetTarget(_player);
-            else if (Camera.Target == null || Camera.Target != _plane) Camera.SetTarget(_plane);
+            if (Camera.Target == null ||Camera.Target != Player) Camera.SetTarget(Player);
+            else if (Camera.Target == null || Camera.Target != Plane) Camera.SetTarget(Plane);
         }
     }
 
@@ -319,15 +252,11 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
             Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
         else if (Camera.CameraMode == CameraMode.FirstPerson)
         {
-            if (Camera.Target != null && Camera.Target == _player)
-            {
-                _player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
-            }
+            if (Camera.Target == Player)
+                Player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
 
-            if (Camera.Target != null && Camera.Target == _plane)
-            {
-                _plane?.Rotate(new((float)-deltaY * 10f, 0, (float)-deltaX * 10f));
-            }
+            if (Camera.Target == Plane)
+                Plane?.Rotate(new((float)-deltaY * 10f, 0, (float)-deltaX * 10f));
         }
         else
             Camera?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
