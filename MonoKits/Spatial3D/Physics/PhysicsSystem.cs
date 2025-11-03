@@ -17,14 +17,15 @@ public class PhysicsSystem : IDisposable
 
     public Simulation Simulation { get; }
 
-    public BufferPool BufferPool { get; } = new();
+    public BufferPool BufferPool { get; }
 
-    public PhysicsSystem()
+    public PhysicsSystem(BufferPool? bufferPool = null)
     {
         var targetThreadCount = Math.Max(1,
             Environment.ProcessorCount > 4 ? Environment.ProcessorCount - 2 : Environment.ProcessorCount - 1);
         _threadDispatcher = new ThreadDispatcher(targetThreadCount);
 
+        BufferPool = bufferPool ?? new();
         Simulation = Simulation.Create(BufferPool,
             new DefaultNarrowPhaseCallbacks(_physicsObjectMapper),
             new DefaultPoseIntegratorCallbacks(_physicsObjectMapper),

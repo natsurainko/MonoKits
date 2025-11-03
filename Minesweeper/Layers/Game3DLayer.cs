@@ -35,7 +35,7 @@ public partial class Game3DLayer : UIElement
         _game = game;
         _sceneManager = new(game.GraphicsDevice);
         _sceneManager.DebugMode = true;
-        _physicsSystem = new PhysicsSystem();
+        _physicsSystem = new PhysicsSystem(new BepuUtilities.Memory.BufferPool(expectedPooledResourceCount: 32));
         _screenCenter = new Point(
             _game.GraphicsDevice.Viewport.Width / 2,
             _game.GraphicsDevice.Viewport.Height / 2
