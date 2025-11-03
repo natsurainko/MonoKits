@@ -109,7 +109,7 @@ public static class PhysicsExtensions
 
                 if (indexBuffer.IndexElementSize == IndexElementSize.SixteenBits)
                 {
-                    var indices = new short[indexBuffer.IndexCount];
+                    var indices = new ushort[indexBuffer.IndexCount];
                     indexBuffer.GetData(indices);
 
                     for (int i = 0; i < primitiveCount; i++)
@@ -127,15 +127,15 @@ public static class PhysicsExtensions
                 }
                 else
                 {
-                    var indices = new int[indexBuffer.IndexCount];
+                    var indices = new uint[indexBuffer.IndexCount];
                     indexBuffer.GetData(indices);
 
                     for (int i = 0; i < primitiveCount; i++)
                     {
                         int idx = startIndex + i * 3;
-                        int i0 = indices[idx] + meshPart.VertexOffset;
-                        int i1 = indices[idx + 1] + meshPart.VertexOffset;
-                        int i2 = indices[idx + 2] + meshPart.VertexOffset;
+                        long i0 = indices[idx] + meshPart.VertexOffset;
+                        long i1 = indices[idx + 1] + meshPart.VertexOffset;
+                        long i2 = indices[idx + 2] + meshPart.VertexOffset;
 
                         triangles.Add(new Triangle(
                             vertices[i0],
