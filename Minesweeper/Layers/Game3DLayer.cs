@@ -60,7 +60,7 @@ public partial class Game3DLayer : UIElement
         _renderer.RenderPipeline.RenderContext.Camera = Camera;
         _renderer.RenderPipeline.RenderContext.GlobalLight = new GlobalLighting
         {
-            Rotation = new Vector3(-MathHelper.PiOver4, -MathHelper.PiOver2, 0),
+            Rotation = new Vector3(-MathHelper.PiOver4, -MathHelper.PiOver4 * 3, 0),
             Color = Color.White,
             AmbientColor = new Color(0.25f, 0.25f, 0.3f)
         };

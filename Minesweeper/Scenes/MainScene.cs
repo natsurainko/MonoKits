@@ -29,12 +29,12 @@ internal partial class MainScene(MainSceneContent mainSceneContent, ContentManag
     [StaticModel(nameof(MainSceneContent.Board))]
     public StaticModelObject3D? Board { get; set; }
 
-    [SceneObject]
-    [SceneObjectPosition(10, 10, 10)]
+    //[SceneObject]
+    //[SceneObjectPosition(10, 10, 10)]
     public SpriteObject3D? Sprite { get; set; }
 
-    [SceneObject]
-    [SceneObjectPosition(0f, 10f, 0f)]
+    //[SceneObject]
+    //[SceneObjectPosition(0f, 10f, 0f)]
     public SpriteObject3D? Bait { get; set; }
 
     [SceneObject]
@@ -42,19 +42,19 @@ internal partial class MainScene(MainSceneContent mainSceneContent, ContentManag
     [SceneObjectPosition(0, 4, 10)]
     public BodyModelObject3D? Player { get; set; }
 
-    [SceneObject]
-    [PhysicsObject]
+    //[SceneObject]
+    //[PhysicsObject]
     public BodyModelObject3D? Plane { get; set; }
 
     protected override void Loading()
     {
-        Sprite = new SpriteObject3D(ScopedContent.Title, _graphicsDevice, new(4.8f, 1.2f));
-        Bait = new SpriteObject3D(ScopedContent.Bait, _graphicsDevice, new(4f, 1f));
+        //Sprite = new SpriteObject3D(ScopedContent.Title, _graphicsDevice, new(4.8f, 1.2f));
+        //Bait = new SpriteObject3D(ScopedContent.Bait, _graphicsDevice, new(4f, 1f));
         Player = new BodyModelObject3D(ScopedContent.Block);
-        Plane = new BodyModelObject3D(ScopedContent.QuickPlane);
+        //Plane = new BodyModelObject3D(ScopedContent.QuickPlane);
 
-        Sprite.Billboard = SpriteObject3D.BillboardMode.CameraBillboard;
-        Bait.Billboard = SpriteObject3D.BillboardMode.CylindricalBillboard;
+        //Sprite.Billboard = SpriteObject3D.BillboardMode.CameraBillboard;
+        //Bait.Billboard = SpriteObject3D.BillboardMode.CylindricalBillboard;
     }
 
     protected override void LoadPhysicsObjects(PhysicsSystem? physicsSystem)
@@ -66,15 +66,11 @@ internal partial class MainScene(MainSceneContent mainSceneContent, ContentManag
         House?.InitializeStatic(physicsSystem, House.Model);
 
         Player?.InitializeBody(physicsSystem, Player.Model);
-        Plane?.InitializeBody(physicsSystem, Plane.Model);
+        //Plane?.InitializeBody(physicsSystem, Plane.Model);
     }
 
     protected override void OnLoaded()
     {
-        Ground!.EnableDefaultLighting();
-        Board!.EnableDefaultLighting();
-        House!.EnableDefaultLighting();
-        Player!.EnableDefaultLighting();
-        Plane!.EnableDefaultLighting();
+
     }
 }
