@@ -12,6 +12,7 @@ public class PhysicsSystem : IDisposable
     private readonly ThreadDispatcher _threadDispatcher;
     private readonly PhysicsObjectMapper _physicsObjectMapper = new();
 
+    private readonly List<IPhysicsBody> _bodiesObjects = [];
     private readonly ConcurrentDictionary<IPhysicsBody, BodyHandle> _physicsBodies = [];
     private readonly ConcurrentDictionary<IPhysicsStatic, StaticHandle> _physicsStatics = [];
 
@@ -37,6 +38,7 @@ public class PhysicsSystem : IDisposable
         BodyHandle handle = Simulation.Bodies.Add(physicsBody.BodyDescription);
         _physicsBodies.TryAdd(physicsBody, handle);
         _physicsObjectMapper.AddObject(handle, physicsBody);
+        _bodiesObjects.Add(physicsBody);
         physicsBody.OnLoaded(Simulation.Bodies.GetBodyReference(handle));
     }
 
@@ -52,6 +54,7 @@ public class PhysicsSystem : IDisposable
         if (!_physicsBodies.TryRemove(physicsBody, out var bodyHandle)) return;
         Simulation.Bodies.Remove(bodyHandle);
         _physicsObjectMapper.TryRemove(bodyHandle, physicsBody.IsKinematic, out _);
+        _bodiesObjects.Remove(physicsBody);
     }
 
     public void Remove(IPhysicsStatic physicsStatic)
@@ -68,11 +71,8 @@ public class PhysicsSystem : IDisposable
 
         Simulation.Timestep(dt, _threadDispatcher);
 
-        foreach (var item in _physicsBodies)
-        {
-            var bodyReference = Simulation.Bodies.GetBodyReference(item.Value);
-            item.Key.OnUpdate(bodyReference.Pose);
-        }
+        for (int i = 0; i < _bodiesObjects.Count; i++)
+            _bodiesObjects[i].OnUpdate();
     }
 
     public void Dispose() => Simulation.Dispose();

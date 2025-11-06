@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Minesweeper.Scenes;
 using Minesweeper.Scenes.Contents;
@@ -8,8 +9,11 @@ using MonoKits.Gui.Input;
 using MonoKits.Overrides;
 using MonoKits.Spatial3D;
 using MonoKits.Spatial3D.Camera;
+using MonoKits.Spatial3D.Lighting;
 using MonoKits.Spatial3D.Objects.Physics;
 using MonoKits.Spatial3D.Physics;
+using MonoKits.Spatial3D.Rendering;
+using MonoKits.Spatial3D.Rendering.Passes;
 using System.Collections.Generic;
 
 namespace Minesweeper.Layers;
@@ -22,6 +26,8 @@ public partial class Game3DLayer : UIElement
     private readonly Game _game;
     private readonly SceneManager _sceneManager;
     private readonly PhysicsSystem _physicsSystem;
+
+    private Renderer? _renderer;
 
     private BodyModelObject3D? Player;
     private BodyModelObject3D? Plane;
@@ -48,6 +54,21 @@ public partial class Game3DLayer : UIElement
         GuiComponent.MouseInputManager.Register(this);
 
         _game.Window.ClientSizeChanged += OnClientSizeChanged;
+
+        _renderer = new Renderer(_game.GraphicsDevice, SpriteBatch!);
+        _renderer.RenderBounds = this.Bounds;
+        _renderer.RenderPipeline.RenderContext.Camera = Camera;
+        _renderer.RenderPipeline.RenderContext.GlobalLight = new GlobalLighting
+        {
+            Rotation = new Vector3(-MathHelper.PiOver4, -MathHelper.PiOver2, 0),
+            Color = Color.White,
+            AmbientColor = new Color(0.25f, 0.25f, 0.3f)
+        };
+        _renderer.RenderPipeline.RenderContext.SceneManager = _sceneManager;
+        _renderer.RenderPipeline.AddPass(() => new ShadowMapPass(_game.Content.Load<Effect>("Effects/ShadowMapEffect")));
+        _renderer.RenderPipeline.AddPass(() => new GeometryPass(_game.Content.Load<Effect>("Effects/GeometryPassEffect")));
+
+        _renderer.RenderPipeline.RenderContext.GlobalLight.FocusOnSceneCenter(Vector3.Zero, 200f);
 
         MainSceneContent mainSceneContent = new(_game.Content);
         MainScene mainScene = new(mainSceneContent, _game.Content, _physicsSystem);
@@ -81,6 +102,9 @@ public partial class Game3DLayer : UIElement
 
     public override void Update(GameTime gameTime)
     {
+        _renderer?.RenderBounds = this.Bounds;
+        _renderer?.Update(gameTime);
+
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         if (deltaTime <= 0) return;
 
@@ -209,7 +233,8 @@ public partial class Game3DLayer : UIElement
 
     protected override void DrawOverride(GameTime gameTime)
     {
-        _sceneManager?.Draw();
+        //_sceneManager?.Draw();
+        _renderer?.Draw(gameTime);
     }
 }
 

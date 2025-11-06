@@ -43,10 +43,10 @@ public partial class BodyModelObject3D(Model model) : ModelObject3D(model), IPhy
         _loaded = true;
     }
 
-    void IPhysicsBody.OnUpdate(RigidPose pose)
+    void IPhysicsBody.OnUpdate()
     {
-        Position = pose.Position;
-        Orientation = pose.Orientation;
+        Position = _bodyReference.Pose.Position;
+        Orientation = _bodyReference.Pose.Orientation;
     }
 }
 

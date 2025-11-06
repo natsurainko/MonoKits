@@ -13,7 +13,7 @@ public interface IPhysicsBody
 
     float Mass { get; }
 
-    public void OnUpdate(RigidPose pose) { }
+    public void OnUpdate() { }
 
     public void OnLoaded(BodyReference bodyReference) { }
 }

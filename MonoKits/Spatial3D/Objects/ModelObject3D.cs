@@ -10,16 +10,33 @@ public partial class ModelObject3D(Model model) : GameObject3D()
 
     public override void Draw(GraphicsDevice graphicsDevice, Effect sharedEffect, Matrix view, Matrix projection)
     {
-        foreach (ModelMesh mesh in Model.Meshes)
+        for (int i = 0; i < Model.Meshes.Count; i++)
         {
-            foreach (IEffectMatrices effect in mesh.Effects.OfType<IEffectMatrices>())
-            {
-                effect.World = _worldMatrix;
-                effect.View = view;
-                effect.Projection = projection;
-            }
+            ModelMesh mesh = Model.Meshes[i];
 
-            mesh.Draw();
+            for (int j = 0; j < mesh.MeshParts.Count; j++)
+            {
+                ModelMeshPart modelMeshPart = mesh.MeshParts[j];
+                Effect effect = sharedEffect;
+
+                if (effect is IEffectMatrices effectMatrices)
+                {
+                    effectMatrices.World = _worldMatrix;
+                    effectMatrices.View = view;
+                    effectMatrices.Projection = projection;
+                }
+
+                if (modelMeshPart.PrimitiveCount <= 0) continue;
+
+                graphicsDevice.SetVertexBuffer(modelMeshPart.VertexBuffer);
+                graphicsDevice.Indices = modelMeshPart.IndexBuffer;
+
+                for (int k = 0; k < effect.CurrentTechnique.Passes.Count; k++)
+                {
+                    effect.CurrentTechnique.Passes[k].Apply();
+                    graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, modelMeshPart.VertexOffset, modelMeshPart.StartIndex, modelMeshPart.PrimitiveCount);
+                }
+            }
         }
     }
 

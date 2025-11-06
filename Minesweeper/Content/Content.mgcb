@@ -14,6 +14,18 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Effects/GeometryPassEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/GeometryPassEffect.fx
+
+#begin Effects/ShadowMapEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/ShadowMapEffect.fx
+
 #begin Models/Block.fbx
 /importer:FbxImporter
 /processor:ModelProcessor
