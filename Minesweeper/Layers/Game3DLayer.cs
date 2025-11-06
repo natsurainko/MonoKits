@@ -14,6 +14,7 @@ using MonoKits.Spatial3D.Objects.Physics;
 using MonoKits.Spatial3D.Physics;
 using MonoKits.Spatial3D.Rendering;
 using MonoKits.Spatial3D.Rendering.Passes;
+using System;
 using System.Collections.Generic;
 
 namespace Minesweeper.Layers;
@@ -68,8 +69,6 @@ public partial class Game3DLayer : UIElement
         _renderer.RenderPipeline.AddPass(() => new ShadowMapPass(_game.Content.Load<Effect>("Effects/ShadowMapEffect")));
         _renderer.RenderPipeline.AddPass(() => new GeometryPass(_game.Content.Load<Effect>("Effects/GeometryPassEffect")));
 
-        _renderer.RenderPipeline.RenderContext.GlobalLight.FocusOnSceneCenter(Vector3.Zero, 200f);
-
         MainSceneContent mainSceneContent = new(_game.Content);
         MainScene mainScene = new(mainSceneContent, _game.Content, _physicsSystem);
         mainScene.Load(_sceneManager);
@@ -92,7 +91,7 @@ public partial class Game3DLayer : UIElement
         _game.Window.ClientSizeChanged -= OnClientSizeChanged;
     }
 
-    private void OnClientSizeChanged(object? sender, System.EventArgs e)
+    private void OnClientSizeChanged(object? sender, EventArgs e)
     {
         _screenCenter = new Point(
             _game.GraphicsDevice.Viewport.Width / 2,
@@ -104,6 +103,12 @@ public partial class Game3DLayer : UIElement
     {
         _renderer?.RenderBounds = this.Bounds;
         _renderer?.Update(gameTime);
+
+        float time = (float)gameTime.TotalGameTime.TotalSeconds;
+        Vector3 sunRotation = new(MathHelper.PiOver2 * MathF.Sin(-MathHelper.PiOver2 + time * 0.05f), -MathHelper.PiOver4 * MathF.Sin(time * 0.05f) * 3, 0);
+
+        _renderer?.RenderPipeline.RenderContext.GlobalLight?.Rotation = sunRotation;
+        _renderer?.RenderPipeline.RenderContext.GlobalLight?.FocusOnSceneCenter(Vector3.Zero, 200f);
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         if (deltaTime <= 0) return;

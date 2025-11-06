@@ -1,4 +1,4 @@
-#if OPENGL
+﻿#if OPENGL
 #define SV_POSITION POSITION
 #define VS_SHADERMODEL vs_3_0
 #define PS_SHADERMODEL ps_3_0
@@ -15,7 +15,6 @@ matrix LightViewProjection;
 float3 LightDirection;
 float3 LightColor;
 float3 AmbientColor;
-float3 LightPosition;
 
 Texture2D ShadowMap;
 sampler2D ShadowMapSampler = sampler_state
@@ -29,7 +28,6 @@ sampler2D ShadowMapSampler = sampler_state
 };
             
 float ShadowMapSize = 2048.0;
-float ShadowBias = 0.0005;
 
 struct VertexShaderInput
 {
@@ -48,7 +46,7 @@ struct VertexShaderOutput
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 {
     VertexShaderOutput output;
-                
+    
     float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
     output.Position = mul(viewPosition, Projection);
@@ -62,7 +60,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float CalculateShadow(float4 lightSpacePosition)
 {
-    float3 projCoords = lightSpacePosition.xyz / lightSpacePosition.w;
+    float3 projCoords = lightSpacePosition.xyz;
     float currentDepth = projCoords.z * 0.5 + 0.5;
     
     projCoords.x = projCoords.x * 0.5 + 0.5;
@@ -72,10 +70,10 @@ float CalculateShadow(float4 lightSpacePosition)
         projCoords.y < 0 || projCoords.y > 1 ||
         currentDepth > 1.0 || currentDepth < 0.0)
         return 1.0;
-    
-    float bias = ShadowBias;
+        
     float shadow = 0.0;
     float texelSize = 1.0 / ShadowMapSize;
+    float bias = texelSize * 1.2;
     
     int sampleRange = 2;
     int sampleCount = 0;
@@ -86,7 +84,7 @@ float CalculateShadow(float4 lightSpacePosition)
         {
             float2 offset = float2(x, y) * texelSize;
             float shadowDepth = tex2D(ShadowMapSampler, projCoords.xy + offset).r;
-            shadow += currentDepth - bias > shadowDepth ? 0.0 : 1.0;
+            shadow += currentDepth - bias > shadowDepth ? 0.15 : 1.0;
             sampleCount++;
         }
     }
@@ -104,7 +102,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     
     float3 ambient = AmbientColor * 0.3;
     float3 lighting = ambient + (LightColor * diffuse * shadow);
-                
+    
     return float4(lighting, 1.0);
 }
 

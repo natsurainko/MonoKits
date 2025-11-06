@@ -71,8 +71,6 @@ public class GeometryPass(Effect effect) : RenderPass
             _lightingEffect.Parameters["LightDirection"]?.SetValue(_context.GlobalLight.GetLightDirection());
             _lightingEffect.Parameters["LightColor"]?.SetValue(_context.GlobalLight.Color.ToVector3());
             _lightingEffect.Parameters["AmbientColor"]?.SetValue(_context.GlobalLight.AmbientColor.ToVector3());
-
-            _lightingEffect.Parameters["LightPosition"]?.SetValue(_context.GlobalLight.Position);
         }
 
         _graphicsDevice.SetRenderTarget(_geometryTarget);

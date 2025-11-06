@@ -47,7 +47,7 @@ public class GlobalLighting : GameObject3D
 
         _lightDirection = forward;
         _lightViewMatrix = Matrix.CreateLookAt(Position, target, up);
-        _lightProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(FieldOfView, 1.0f, NearPlane, FarPlane);
+        _lightProjectionMatrix = Matrix.CreateOrthographic(200f, 200f, NearPlane, FarPlane);
         _lightViewProjectionMatrix = _lightViewMatrix * _lightProjectionMatrix;
     }
 }
