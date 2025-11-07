@@ -26,4 +26,6 @@ public partial class Renderer(GraphicsDevice graphicsDevice, SpriteBatch spriteB
             spriteBatch.Draw(output, Vector2.Zero, Color.White);
         else spriteBatch.Draw(output, RenderBounds.Value, Color.White);
     }
+
+    public void ReInitializePasses() => RenderPipeline.ReInitializePasses();
 }

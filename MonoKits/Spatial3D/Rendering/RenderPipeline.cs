@@ -6,11 +6,18 @@ namespace MonoKits.Spatial3D.Rendering;
 public class RenderPipeline(GraphicsDevice graphicsDevice) : IDisposable
 {
     private readonly List<RenderPass> _renderPasses = [];
+    private bool _reInitializingPasses = false;
 
     public RenderContext RenderContext { get; private set; } = new();
 
     public void Execute(out RenderTarget2D? output)
     {
+        if (_reInitializingPasses)
+        {
+            output = null;
+            return;
+        }
+
         RenderTarget2D? previousOutput = null;
 
         for (int i = 0; i < _renderPasses.Count; i++)
@@ -48,6 +55,19 @@ public class RenderPipeline(GraphicsDevice graphicsDevice) : IDisposable
     {
         if (_renderPasses.Remove(pass))
             pass.Dispose();
+    }
+
+    public void ReInitializePasses()
+    {
+        _reInitializingPasses = true;
+
+        for (int i = 0; i < _renderPasses.Count; i++)
+        {
+            _renderPasses[i].Dispose();
+            _renderPasses[i].Initialize(graphicsDevice, RenderContext);
+        }
+
+        _reInitializingPasses = false;
     }
 
     public void Update(GameTime gameTime) => RenderContext.Update(gameTime);

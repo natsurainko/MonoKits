@@ -9,7 +9,7 @@ public class ShadowMapPass(Effect effect) : RenderPass
     private RenderTarget2D? _shadowMap;
     private DepthStencilState? _depthStencilState;
 
-    public int ShadowMapSize { get; set; } = 2048;
+    public int ShadowMapSize { get; set; } = 4096;
 
     public override string Name => nameof(ShadowMapPass);
 
@@ -74,7 +74,6 @@ public class ShadowMapPass(Effect effect) : RenderPass
 
     public override void Dispose()
     {
-        _depthEffect?.Dispose();
         _shadowMap?.Dispose();
         _depthStencilState?.Dispose();
     }

@@ -19,8 +19,8 @@ public class GeometryPass(Effect effect) : RenderPass
 
         _geometryTarget = new RenderTarget2D(
             _graphicsDevice,
-            parameters.BackBufferWidth * 2,
-            parameters.BackBufferHeight * 2,
+            parameters.BackBufferWidth,
+            parameters.BackBufferHeight,
             false,
             SurfaceFormat.HdrBlendable,
             DepthFormat.Depth24Stencil8,
@@ -98,7 +98,6 @@ public class GeometryPass(Effect effect) : RenderPass
     }
     public override void Dispose()
     {
-        _lightingEffect?.Dispose();
         _geometryTarget?.Dispose();
         _depthStencilState?.Dispose();
         _shadowSamplerState?.Dispose();
