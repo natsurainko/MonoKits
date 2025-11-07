@@ -90,7 +90,11 @@ public partial class GuiComponent(GameApplication game, Action<CanvasPanel>? con
 
     public virtual void Draw(GameTime gameTime)
     {
-        ContentRoot?.SpriteBatch?.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
+        ContentRoot?.SpriteBatch?.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, new RasterizerState
+        {
+            CullMode = CullMode.CullCounterClockwiseFace,
+            ScissorTestEnable = true
+        });
         ContentRoot?.Draw(gameTime);
         ContentRoot?.SpriteBatch?.End();
     }

@@ -373,34 +373,12 @@ public partial class UIElement : IUpdateable, IDrawable
 
         var device = SpriteBatch!.GraphicsDevice;
         var originalScissorRect = device.ScissorRectangle;
-        var originalRasterizerState = device.RasterizerState;
-
-        SpriteBatch.End();
 
         device.ScissorRectangle = Rectangle.Intersect(Bounds, originalScissorRect);
 
-        SpriteBatch.Begin
-        (
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            ScissorRasterizerState
-        );
-
         DrawOverride(gameTime);
 
-        SpriteBatch.End();
-
         device.ScissorRectangle = originalScissorRect;
-
-        SpriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            originalRasterizerState
-        );
     }
 
     /// <summary>
