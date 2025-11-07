@@ -49,7 +49,7 @@ public class ShadowMapPass(Effect effect) : RenderPass
         _graphicsDevice.SetRenderTarget(_shadowMap);
         _graphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.White, 1.0f, 0);
         _graphicsDevice.DepthStencilState = _depthStencilState;
-        _graphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+        _graphicsDevice.RasterizerState = RasterizerState.CullClockwise;
         output = input;
 
         if (_context.SceneManager == null) return;

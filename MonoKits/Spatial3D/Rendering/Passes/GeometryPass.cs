@@ -37,7 +37,7 @@ public class GeometryPass(Effect effect) : RenderPass
 
         _shadowSamplerState = new SamplerState
         {
-            Filter = TextureFilter.Point,
+            Filter = TextureFilter.Linear,
             AddressU = TextureAddressMode.Clamp,
             AddressV = TextureAddressMode.Clamp
         };

@@ -14,6 +14,7 @@ public static class PhysicsExtensions
         where TGameObject3D : GameObject3D, IPhysicsStatic
     {
         List<Triangle> triangles = model.ExtractTrianglesFromModel();
+        if (triangles.Count == 0) return;
 
         physicsSystem.BufferPool.Take<Triangle>(triangles.Count, out var triangleBuffer);
 

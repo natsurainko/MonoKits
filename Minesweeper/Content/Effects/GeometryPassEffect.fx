@@ -20,8 +20,8 @@ Texture2D ShadowMap;
 sampler2D ShadowMapSampler = sampler_state
 {
     Texture = <ShadowMap>;
-    MinFilter = Point;
-    MagFilter = Point;
+    MinFilter = Linear;
+    MagFilter = Linear;
     MipFilter = None;
     AddressU = Clamp;
     AddressV = Clamp;
@@ -58,7 +58,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     return output;
 }
 
-float CalculateShadow(float4 lightSpacePosition)
+float CalculateShadow(float4 lightSpacePosition, float3 normal)
 {
     float3 projCoords = lightSpacePosition.xyz;
     float currentDepth = projCoords.z * 0.5 + 0.5;
@@ -73,14 +73,18 @@ float CalculateShadow(float4 lightSpacePosition)
         
     float shadow = 0.0;
     float texelSize = 1.0 / ShadowMapSize;
-    float bias = texelSize * 1.2;
-    
-    int sampleRange = 2;
+    float bias = 0.005 * tan(acos(dot(normal, 1)));
+    //float bias = 0.00001;
+
+    int sampleRange = 1;
     int sampleCount = 0;
     
-    for (int x = -sampleRange; x <= sampleRange; x++)
+    //float shadowDepth = tex2D(ShadowMapSampler, projCoords.xy).r;
+    //shadow += currentDepth - bias > shadowDepth ? 0.15 : 1.0;
+
+    for (int x = -sampleRange; x <= sampleRange; ++x)
     {
-        for (int y = -sampleRange; y <= sampleRange; y++)
+        for (int y = -sampleRange; y <= sampleRange; ++y)
         {
             float2 offset = float2(x, y) * texelSize;
             float shadowDepth = tex2D(ShadowMapSampler, projCoords.xy + offset).r;
@@ -98,7 +102,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float3 lightDir = normalize(-LightDirection);
     
     float diffuse = max(dot(normal, lightDir), 0.0);
-    float shadow = CalculateShadow(input.LightSpacePosition);
+    float shadow = CalculateShadow(input.LightSpacePosition, normal);
     
     float3 ambient = AmbientColor * 0.3;
     float3 lighting = ambient + (LightColor * diffuse * shadow);
