@@ -9,7 +9,7 @@ public class ShadowMapPass(Effect effect) : RenderPass
     private RenderTarget2D? _shadowMap;
     private DepthStencilState? _depthStencilState;
 
-    public int ShadowMapSize { get; set; } = 4096;
+    public int ShadowMapSize { get; set; } = 8192;
 
     public override string Name => nameof(ShadowMapPass);
 
@@ -21,11 +21,11 @@ public class ShadowMapPass(Effect effect) : RenderPass
             graphicsDevice,
             ShadowMapSize,
             ShadowMapSize,
-            true,
+            false,
             SurfaceFormat.Single,
-            DepthFormat.Depth24Stencil8,
+            DepthFormat.Depth16,
             0,
-            RenderTargetUsage.PreserveContents
+            RenderTargetUsage.DiscardContents
         );
 
         _depthStencilState = new DepthStencilState

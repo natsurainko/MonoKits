@@ -37,7 +37,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float depth = input.ClipPosition.z / input.ClipPosition.w;
     depth = depth * 0.5 + 0.5;
     
-    return float4(depth, depth, depth, 1);
+    return float4(depth, 0, 0, 1);
 }
 
 technique ShadowMapTechnique

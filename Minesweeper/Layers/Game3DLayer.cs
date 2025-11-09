@@ -27,6 +27,7 @@ public partial class Game3DLayer : UIElement
     private readonly Game _game;
     private readonly SceneManager _sceneManager;
     private readonly PhysicsSystem _physicsSystem;
+    private DayTimeSystem? _dayTimeSystem;
 
     private Renderer? _renderer;
 
@@ -67,8 +68,10 @@ public partial class Game3DLayer : UIElement
         };
         _renderer.RenderPipeline.RenderContext.SceneManager = _sceneManager;
         _renderer.RenderPipeline.RenderContext.GlobalLight?.FocusOnSceneCenter(Vector3.Zero, 200f);
-        _renderer.RenderPipeline.AddPass(() => new ShadowMapPass(_game.Content.Load<Effect>("Effects/ShadowMapEffect")));
-        _renderer.RenderPipeline.AddPass(() => new GeometryPass(_game.Content.Load<Effect>("Effects/GeometryPassEffect")));
+        _renderer.RenderPipeline.AddPass<ShadowMapPass>(() => new(_game.Content.Load<Effect>("Effects/ShadowMapPassEffect")));
+        _renderer.RenderPipeline.AddPass<GBufferPass>(() => new(_game.Content.Load<Effect>("Effects/GBufferPassEffect")));
+        _renderer.RenderPipeline.AddPass<LightingPass>(() => new(_game.Content.Load<Effect>("Effects/LightingPassEffect")));
+        _dayTimeSystem = new(_renderer.RenderPipeline.RenderContext);
 
         MainSceneContent mainSceneContent = new(_game.Content);
         MainScene mainScene = new(mainSceneContent, _game.Content, _physicsSystem);
@@ -102,18 +105,19 @@ public partial class Game3DLayer : UIElement
         _renderer?.ReInitializePasses();
     }
 
-    float timeRatio = 0.01f;
+    float timeRatio = 0.05f;
 
     public override void Update(GameTime gameTime)
     {
         _renderer?.RenderBounds = this.Bounds;
         _renderer?.Update(gameTime);
+        _dayTimeSystem?.Update(gameTime);
 
-        float time = (float)gameTime.TotalGameTime.TotalSeconds * timeRatio;
-        Vector3 sunRotation = new(MathHelper.PiOver2 * MathF.Sin(-MathHelper.PiOver2 + time), -MathHelper.PiOver4 * MathF.Sin(time) * 3, 0);
+        //float time = (float)gameTime.TotalGameTime.TotalSeconds * timeRatio;
+        //Vector3 sunRotation = new(MathHelper.PiOver2 * MathF.Sin(-MathHelper.PiOver2 + time), -MathHelper.PiOver4 * MathF.Sin(time) * 3, 0);
 
-        _renderer?.RenderPipeline.RenderContext.GlobalLight?.Rotation = sunRotation;
-        _renderer?.RenderPipeline.RenderContext.GlobalLight?.FocusOnSceneCenter(Vector3.Zero, 200f);
+        //_renderer?.RenderPipeline.RenderContext.GlobalLight?.Rotation = sunRotation;
+        //_renderer?.RenderPipeline.RenderContext.GlobalLight?.FocusOnSceneCenter(Vector3.Zero, 200f);
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         if (deltaTime <= 0) return;
@@ -288,7 +292,7 @@ public partial class Game3DLayer : IFocusableElement, IMouseInputReceiver, IKeyb
         else if (Camera.CameraMode == CameraMode.FirstPerson)
         {
             if (Camera.Target == Player)
-                Player?.Rotate(new((float)-deltaY, (float)-deltaX, 0));
+                Player?.Rotate(new((float)-deltaY * 100f, (float)-deltaX * 100f, 0));
 
             if (Camera.Target == Plane)
                 Plane?.Rotate(new((float)-deltaY * 10f, 0, (float)-deltaX * 10f));

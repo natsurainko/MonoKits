@@ -11,7 +11,8 @@ public class GlobalLighting : GameObject3D
     private Matrix _lightViewProjectionMatrix;
 
     public Color Color { get; set; } = Color.White;
-    public Color AmbientColor { get; set; } = new Color(0.2f, 0.2f, 0.2f);
+    public Color AmbientColor { get; set; } = new Color(0.6f, 0.6f, 0.6f);
+    public float ShadowIntensity { get; set; } = 1.0f;
 
     public float FieldOfView { get; set; } = MathHelper.PiOver2;
     public float NearPlane { get; set; } = 1f;

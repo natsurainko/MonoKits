@@ -14,17 +14,23 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Effects/GeometryPassEffect.fx
+#begin Effects/GBufferPassEffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:Effects/GeometryPassEffect.fx
+/build:Effects/GBufferPassEffect.fx
 
-#begin Effects/ShadowMapEffect.fx
+#begin Effects/LightingPassEffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:Effects/ShadowMapEffect.fx
+/build:Effects/LightingPassEffect.fx
+
+#begin Effects/ShadowMapPassEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/ShadowMapPassEffect.fx
 
 #begin Models/Block.fbx
 /importer:FbxImporter
